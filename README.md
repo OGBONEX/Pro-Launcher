@@ -1,2 +1,3 @@
 # Pro-Launcher
 Becoming the best matters to us...
+Pro Launcher - Minecraft Launcher
