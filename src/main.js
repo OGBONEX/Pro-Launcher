@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
-const mc = require('./minecraft');
+// const mc = require('./minecraft');
 
 updateElectronApp({ updateInterval: '1 hour' });
 
