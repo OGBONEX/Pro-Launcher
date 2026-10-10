@@ -9,19 +9,24 @@ const JAVA_BASE_DIR = path.join(os.homedir(), '.proclient', 'java');
 // Adoptium Temurin JRE download URLs per major version
 const JAVA_URLS = {
   8: {
-    win32:  'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jre_x64_windows_hotspot_8u422b05.zip',
-    darwin: 'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jre_x64_mac_hotspot_8u422b05.zip',
-    linux:  'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jre_x64_linux_hotspot_8u422b05.zip'
+    win32:  'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u482-b08/OpenJDK8U-jre_x64_windows_hotspot_8u482b08.zip',
+    darwin: 'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u482-b08/OpenJDK8U-jre_x64_mac_hotspot_8u482b08.zip',
+    linux:  'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u482-b08/OpenJDK8U-jre_x64_linux_hotspot_8u482b08.zip'
   },
   17: {
-    win32:  'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.12_7.zip',
-    darwin: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_mac_hotspot_17.0.12_7.zip',
-    linux:  'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.12_7.zip'
+    win32:  'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jre_x64_windows_hotspot_17.0.18_8.zip',
+    darwin: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jre_x64_mac_hotspot_17.0.18_8.zip',
+    linux:  'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jre_x64_linux_hotspot_17.0.18_8.zip'
   },
   21: {
-    win32:  'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.4_7.zip',
-    darwin: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_mac_hotspot_21.0.4_7.zip',
-    linux:  'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_linux_hotspot_21.0.4_7.zip'
+    win32:  'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.10_7.zip',
+    darwin: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jre_x64_mac_hotspot_21.0.10_7.zip',
+    linux:  'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.10%2B7/OpenJDK21U-jre_x64_linux_hotspot_21.0.10_7.zip'
+  },
+  25: {
+    win32:  'https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jre_x64_windows_hotspot_25.0.2_10.zip',
+    darwin: 'https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jre_x64_mac_hotspot_25.0.2_10.zip',
+    linux:  'https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jre_x64_linux_hotspot_25.0.2_10.zip'
   }
 };
 
@@ -52,11 +57,10 @@ function downloadFile(url, dest) {
   });
 }
 
-async function ensureJava(majorVersion = 21) {
+async function ensureJava(majorVersion = 25) {
   const javaExe = process.platform === 'win32' ? 'bin\\java.exe' : 'bin/java';
   const javaDir = path.join(JAVA_BASE_DIR, `jre${majorVersion}`);
 
-  // Check if already downloaded
   if (fs.existsSync(javaDir)) {
     const entries = fs.readdirSync(javaDir).filter(e => e.startsWith('jdk') || e.startsWith('OpenJDK'));
     if (entries.length) {
@@ -68,7 +72,6 @@ async function ensureJava(majorVersion = 21) {
     }
   }
 
-  // Download
   const urls = JAVA_URLS[majorVersion];
   if (!urls) throw new Error(`No download URL for Java ${majorVersion}`);
   const url = urls[process.platform];
