@@ -1,110 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pro Client</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'bg-deep':    '#0a0a12',
-            'bg-base':    '#0d0d16',
-            'bg-panel':   '#14141e',
-            'bg-raised':  '#1a1a26',
-            'border-dim': '#1f1f2e',
-            'border-lit': '#2a2a3f',
-            'text-hi':    '#f0f0f8',
-            'text-lo':    '#8a8aa3',
-            'text-dim':   '#5a5a72',
-            'brand':      '#ff3b3b',
-            'brand-hi':   '#ff5555'
-          }
-        }
-      }
-    }
-  </script>
-</head>
-<body class="bg-bg-base text-text-hi overflow-hidden">
+      <!-- CONTENT HUB TAB (Lunar Explore style) -->
+      <section id="content" class="tab hidden h-full flex flex-col">
 
-  <!-- Titlebar -->
-  <div class="titlebar absolute top-0 left-0 right-0 h-9 bg-bg-deep/95 backdrop-blur border-b border-border-dim flex justify-between items-center px-3 z-50">
-    <div class="flex items-center gap-2">
-      <span class="w-1.5 h-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,59,59,0.8)]"></span>
-      <span class="text-xs font-bold tracking-wide text-text-hi">PRO CLIENT</span>
-    </div>
-    <div class="flex gap-0.5">
-      <button id="min" class="w-8 h-7 rounded hover:bg-bg-raised text-text-lo text-sm">—</button>
-      <button id="max" class="w-8 h-7 rounded hover:bg-bg-raised text-text-lo text-sm">▢</button>
-      <button id="close" class="w-8 h-7 rounded hover:bg-brand text-text-lo hover:text-white text-sm">✕</button>
-    </div>
-  </div>
-
-  <!-- App shell -->
-  <div class="pt-9 h-screen flex">
-
-    <!-- Icon rail -->
-    <aside class="rail w-[80px] flex flex-col items-center py-3">
-
-      <button data-tab="home" class="rail-btn active">
-        <span class="rail-icon">🏠</span>
-        <span>Home</span>
-      </button>
-
-      <button data-tab="content" class="rail-btn">
-        <span class="rail-icon">🧩</span>
-        <span>Content</span>
-      </button>
-
-      <button data-tab="skins" class="rail-btn">
-        <span class="rail-icon">👤</span>
-        <span>Skins</span>
-      </button>
-
-      <button data-tab="settings" class="rail-btn">
-        <span class="rail-icon">⚙️</span>
-        <span>Config</span>
-      </button>
-
-      <div class="flex-1"></div>
-
-      <button id="open-account-modal" class="rail-btn" title="Accounts">
-        <span class="rail-icon">👥</span>
-        <span id="rail-username">Player</span>
-      </button>
-
-      <div class="rail-btn" style="pointer-events:none;">
-        <span class="rail-icon" style="color:#22c55e; font-size:14px;">●</span>
-        <span class="text-text-dim">Online</span>
-      </div>
-      <div class="text-[10px] text-text-dim pb-2 tracking-wider">v1.1.0</div>
-    </aside>
-
-    <!-- Main content -->
-    <main class="flex-1 overflow-hidden">
-
-      <!-- HOME TAB -->
-      <section id="home" class="tab h-full overflow-y-auto p-8">
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold tracking-tight">Welcome back</h1>
-          <p class="text-text-lo mt-1 text-sm">Ready to jump into your next world?</p>
-        </div>
-
-        <!-- Play panel -->
-        <div class="glass rounded-2xl p-6 mb-8 flex items-center gap-6">
-          <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-brand to-brand-hi flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(255,59,59,0.4)]">
-            ⛏️
+        <!-- Top bar: big search + filters -->
+        <div class="px-8 pt-6 pb-4 border-b border-border-dim">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex-1 relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim">🔍</span>
+              <input id="content-query" 
+                     placeholder="Search mods, modpacks, resource packs..."
+                     class="w-full pl-11 pr-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm" />
+            </div>
+            <button id="content-search-btn"
+                    class="px-8 py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition text-sm">
+              Search
+            </button>
           </div>
-          <div class="flex-1">
-            <h2 class="text-xl font-bold">Minecraft</h2>
-            <p class="text-text-lo text-sm mt-0.5">Latest Release • <span id="home-version">1.21.4</span></p>
-          </div>
-          <div class="flex gap-2 items-center">
-            <select id="version-select"
-                    class="px-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
+
+          <!-- Filter row -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-text-dim mr-1">Filter:</span>
+            <select id="content-version"
+                    class="px-3 py-1.5 bg-bg-raised/60 rounded-lg border border-border-dim text-text-hi text-xs outline-none hover:border-brand/40">
               <option value="1.21.4">1.21.4</option>
               <option value="1.21.1">1.21.1</option>
               <option value="1.20.6">1.20.6</option>
@@ -115,150 +31,43 @@
               <option value="1.12.2">1.12.2</option>
               <option value="1.8.9">1.8.9</option>
             </select>
-            <button id="play" class="px-8 py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition shadow-[0_0_20px_rgba(255,59,59,0.4)] hover:shadow-[0_0_30px_rgba(255,59,59,0.6)]">
-              ▶ PLAY
-            </button>
-          </div>
-        </div>
-
-        <p id="status" class="text-text-lo text-sm mb-6"></p>
-
-        <section class="mb-8">
-          <h2 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-3">Recent</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="glass rounded-xl p-4 hover:border-brand/40 transition cursor-pointer">
-              <div class="w-full h-20 rounded-lg bg-gradient-to-br from-brand/20 to-brand-hi/10 mb-3 flex items-center justify-center text-2xl">🌍</div>
-              <h3 class="font-semibold text-sm">Latest Release</h3>
-              <p class="text-xs text-text-dim mt-0.5">1.21.4 • Vanilla</p>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <h2 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-3">Library</h2>
-          <div class="glass rounded-xl p-8 text-center">
-            <p class="text-text-lo text-sm">No instances yet. Hit Play to install Minecraft.</p>
-          </div>
-        </section>
-      </section>
-
-      <!-- CONTENT HUB TAB -->
-      <section id="content" class="tab hidden h-full flex flex-col">
-        <!-- Type tabs -->
-        <div class="flex gap-1 px-6 pt-4 border-b border-border-dim">
-          <button class="content-type-tab active" data-type="modpack">Modpacks</button>
-          <button class="content-type-tab" data-type="mod">Mods</button>
-          <button class="content-type-tab" data-type="resourcepack">Resource Packs</button>
-          <button class="content-type-tab" data-type="datapack">Data Packs</button>
-        </div>
-
-        <!-- Search bar -->
-        <div class="p-6">
-          <div class="flex gap-2">
-            <input id="content-query" placeholder="Search..."
-                   class="flex-1 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm" />
-            <select id="content-source"
-                    class="px-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
-              <option value="proclient">Pro Client Library</option>
-              <option value="community">Community Mods</option>
+            <select id="content-loader"
+                    class="px-3 py-1.5 bg-bg-raised/60 rounded-lg border border-border-dim text-text-hi text-xs outline-none hover:border-brand/40">
+              <option value="fabric">Fabric</option>
+              <option value="forge">Forge</option>
+              <option value="quilt">Quilt</option>
+              <option value="neoforge">NeoForge</option>
             </select>
-            <button id="content-search-btn"
-                    class="px-8 py-3 bg-brand rounded-xl font-semibold text-white hover:bg-brand-hi transition text-sm">
-              Search
-            </button>
+            <div class="flex-1"></div>
+            <span id="content-count" class="text-xs text-text-dim"></span>
           </div>
+        </div>
+
+        <!-- Content type tabs -->
+        <div class="flex gap-1 px-8 pt-4">
+          <button class="content-type-tab active" data-type="modpack">
+            📦 Modpacks
+          </button>
+          <button class="content-type-tab" data-type="mod">
+            🧩 Mods
+          </button>
+          <button class="content-type-tab" data-type="resourcepack">
+            🎨 Resource Packs
+          </button>
+          <button class="content-type-tab" data-type="datapack">
+            🗂️ Data Packs
+          </button>
         </div>
 
         <!-- Results -->
-        <div class="flex-1 overflow-y-auto px-6 pb-6">
-          <div id="content-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        <div class="flex-1 overflow-y-auto px-8 py-6">
+          <div id="content-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Empty state -->
+            <div class="col-span-full text-center py-20">
+              <div class="text-5xl mb-4">🔎</div>
+              <p class="text-text-lo text-sm">Search for content to install</p>
+              <p class="text-text-dim text-xs mt-2">Powered by Modrinth</p>
+            </div>
+          </div>
         </div>
       </section>
-
-      <!-- SKINS TAB -->
-      <section id="skins" class="tab hidden h-full p-8 overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-2">Skins</h2>
-        <p class="text-text-lo text-sm">Skin system coming soon.</p>
-      </section>
-
-      <!-- SETTINGS TAB -->
-      <section id="settings" class="tab hidden h-full p-8 overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4">Settings</h2>
-        <div class="glass rounded-xl p-6">
-          <p class="text-text-lo text-sm">Settings coming soon.</p>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ============================================================
-       ACCOUNT MODAL
-  ============================================================ -->
-  <div id="account-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center">
-    <div class="glass rounded-2xl p-6 w-[420px] max-w-[90vw]">
-
-      <!-- Account list view -->
-      <div id="account-list-view">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold">Accounts</h3>
-          <button id="close-account-modal" class="text-text-lo hover:text-text-hi text-xl leading-none">✕</button>
-        </div>
-
-        <div id="account-list" class="space-y-2 mb-4 max-h-[300px] overflow-y-auto"></div>
-
-        <button id="add-account-btn"
-                class="w-full py-3 bg-bg-raised/80 rounded-xl border border-border-dim hover:border-brand/40 transition text-sm font-semibold flex items-center justify-center gap-2">
-          <span class="text-lg">+</span> Add Account
-        </button>
-      </div>
-
-      <!-- Add account type view -->
-      <div id="account-type-view" class="hidden">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold">Add Account</h3>
-          <button id="back-to-list" class="text-text-lo hover:text-text-hi text-sm">← Back</button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <button id="add-microsoft-btn"
-                  class="glass rounded-xl p-6 hover:border-brand/40 transition flex flex-col items-center gap-2 opacity-50 cursor-not-allowed"
-                  title="Coming soon">
-            <span class="text-3xl">🔷</span>
-            <span class="text-sm font-semibold">Microsoft</span>
-            <span class="text-[10px] text-text-dim">Coming soon</span>
-          </button>
-          <button id="add-offline-btn"
-                  class="glass rounded-xl p-6 hover:border-brand/40 transition flex flex-col items-center gap-2">
-            <span class="text-3xl">👤</span>
-            <span class="text-sm font-semibold">Offline</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Offline username view -->
-      <div id="offline-view" class="hidden">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold">Offline Account</h3>
-          <button id="back-to-types" class="text-text-lo hover:text-text-hi text-sm">← Back</button>
-        </div>
-
-        <input id="offline-username"
-               placeholder="Enter username (3-16 chars)"
-               maxlength="16"
-               class="w-full p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm mb-2" />
-
-        <p id="offline-error" class="text-brand text-xs mb-3 hidden"></p>
-
-        <button id="confirm-offline-btn"
-                class="w-full py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition">
-          Add Account
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
