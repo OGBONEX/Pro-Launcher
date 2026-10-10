@@ -16,26 +16,37 @@ document.querySelectorAll('.sidebar button').forEach(btn => {
 // ----- PLAY button (real Minecraft launch) -----
 document.getElementById('play').onclick = async () => {
   const btn = document.getElementById('play');
-  const status = document.getElementById('status') || document.createElement('p');
-  status.id = 'status';
-  btn.parentNode.appendChild(status);
-  
-  btn.textContent = 'Installing...';
+
+  // Create or reuse a status line under the button
+  let status = document.getElementById('status');
+  if (!status) {
+    status = document.createElement('p');
+    status.id = 'status';
+    status.style.marginTop = '12px';
+    status.style.color = '#a0a0b8';
+    status.style.fontSize = '14px';
+    btn.parentNode.appendChild(status);
+  }
+
+  btn.textContent = '⏳ Launching...';
   btn.disabled = true;
-  status.textContent = 'Downloading Minecraft files... (this may take a few minutes)';
-  
-  const version = '1.21.4';
-  const username = 'Player';
-  
-  const result = await window.proClient.launchGame({ version, username });
-  
+  status.textContent = 'Downloading Minecraft (first launch may take several minutes)...';
+  status.style.color = '#a0a0b8';
+
+  const result = await window.proClient.launchGame({
+    version: '1.21.4',
+    username: 'Player'
+  });
+
   btn.textContent = '▶ PLAY';
   btn.disabled = false;
-  
+
   if (result.ok) {
-    status.textContent = 'Minecraft launched!';
+    status.textContent = '✅ Minecraft is starting...';
+    status.style.color = '#4ade80';
   } else {
-    status.textContent = 'Error: ' + result.error;
+    status.textContent = '❌ Error: ' + result.error;
+    status.style.color = '#ff3b3b';
   }
 };
 
@@ -61,7 +72,7 @@ if (modsTab) {
     const results = document.getElementById('mod-results');
 
     if (!query) return;
-    results.innerHTML = '<p>Searching...</p>';
+    results.innerHTML = '<p style="color:#a0a0b8;">Searching...</p>';
 
     const res = await window.proClient.searchMods({
       query,
@@ -75,7 +86,7 @@ if (modsTab) {
       return;
     }
     if (!res.results.length) {
-      results.innerHTML = '<p>No results.</p>';
+      results.innerHTML = '<p style="color:#a0a0b8;">No results.</p>';
       return;
     }
 
@@ -83,7 +94,7 @@ if (modsTab) {
       <div style="padding:12px;margin:8px 0;background:#10101a;border-radius:8px;border:1px solid #22222e;">
         <strong>${m.name}</strong>
         <p style="color:#a0a0b8;font-size:13px;margin:4px 0;">${m.description || ''}</p>
-        <small style="color:#666;">by ${m.author} • ${(m.downloads||0).toLocaleString()} downloads</small>
+        <small style="color:#666;">by ${m.author} • ${(m.downloads || 0).toLocaleString()} downloads</small>
       </div>
     `).join('');
   };
