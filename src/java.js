@@ -1,154 +1,94 @@
-require('./discord');
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const https = require('https');
 const os = require('os');
-const { updateElectronApp } = require('update-electron-app');
-const mods = require('./mods');
-const mc = require('./minecraft');
-const { installContent } = require('./downloader');
+const extract = require('extract-zip');
 
-const ACCOUNTS_FILE = path.join(os.homedir(), '.proclient', 'accounts.json');
+const JAVA_BASE_DIR = path.join(os.homedir(), '.proclient', 'java');
 
-updateElectronApp({
-  repo: 'OGBONEX/Pro-Launcher',
-  updateInterval: '1 hour'
-});
+// Adoptium Temurin JRE download URLs per major version
+const JAVA_URLS = {
+  8: {
+    win32:  'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jre_x64_windows_hotspot_8u422b05.zip',
+    darwin: 'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jre_x64_mac_hotspot_8u422b05.zip',
+    linux:  'https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u422-b05/OpenJDK8U-jre_x64_linux_hotspot_8u422b05.zip'
+  },
+  17: {
+    win32:  'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.12_7.zip',
+    darwin: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_mac_hotspot_17.0.12_7.zip',
+    linux:  'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/OpenJDK17U-jre_x64_linux_hotspot_17.0.12_7.zip'
+  },
+  21: {
+    win32:  'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_windows_hotspot_21.0.4_7.zip',
+    darwin: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_mac_hotspot_21.0.4_7.zip',
+    linux:  'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jre_x64_linux_hotspot_21.0.4_7.zip'
+  }
+};
 
-let mainWindow;
-
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 700,
-    minWidth: 900,
-    minHeight: 600,
-    frame: false,
-    backgroundColor: '#0d0d16',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false
-    }
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    const follow = (u) => {
+      https.get(u, (response) => {
+        if (response.statusCode === 302 || response.statusCode === 301) {
+          file.close();
+          fs.unlink(dest, () => {});
+          return follow(response.headers.location);
+        }
+        if (response.statusCode !== 200) {
+          file.close();
+          fs.unlink(dest, () => {});
+          return reject(new Error(`HTTP ${response.statusCode}`));
+        }
+        response.pipe(file);
+        file.on('finish', () => file.close(resolve));
+      }).on('error', (err) => {
+        file.close();
+        fs.unlink(dest, () => {});
+        reject(err);
+      });
+    };
+    follow(url);
   });
-
-  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 }
 
-app.whenReady().then(createWindow);
+async function ensureJava(majorVersion = 21) {
+  const javaExe = process.platform === 'win32' ? 'bin\\java.exe' : 'bin/java';
+  const javaDir = path.join(JAVA_BASE_DIR, `jre${majorVersion}`);
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
-// ============================================================
-// WINDOW CONTROLS
-// ============================================================
-ipcMain.on('window-minimize', () => mainWindow.minimize());
-ipcMain.on('window-maximize', () => {
-  mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
-});
-ipcMain.on('window-close', () => mainWindow.close());
-
-// ============================================================
-// ACCOUNTS (Offline only)
-// ============================================================
-function loadAccounts() {
-  try {
-    if (fs.existsSync(ACCOUNTS_FILE)) {
-      return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+  // Check if already downloaded
+  if (fs.existsSync(javaDir)) {
+    const entries = fs.readdirSync(javaDir).filter(e => e.startsWith('jdk') || e.startsWith('OpenJDK'));
+    if (entries.length) {
+      const javaPath = path.join(javaDir, entries[0], javaExe);
+      if (fs.existsSync(javaPath)) {
+        console.log(`[Java] Found local JRE ${majorVersion} at`, javaPath);
+        return javaPath;
+      }
     }
-  } catch (e) {
-    console.error('[Accounts] Failed to load:', e);
   }
-  return { accounts: [], active: null };
+
+  // Download
+  const urls = JAVA_URLS[majorVersion];
+  if (!urls) throw new Error(`No download URL for Java ${majorVersion}`);
+  const url = urls[process.platform];
+  if (!url) throw new Error(`Unsupported platform: ${process.platform}`);
+
+  console.log(`[Java] Downloading JRE ${majorVersion}...`);
+  fs.mkdirSync(javaDir, { recursive: true });
+  const archive = path.join(javaDir, 'jre.zip');
+  await downloadFile(url, archive);
+
+  console.log('[Java] Extracting...');
+  await extract(archive, { dir: javaDir });
+  fs.unlinkSync(archive);
+
+  const entries = fs.readdirSync(javaDir).filter(e => e.startsWith('jdk') || e.startsWith('OpenJDK'));
+  if (!entries.length) throw new Error('Java extraction failed');
+
+  const javaPath = path.join(javaDir, entries[0], javaExe);
+  console.log(`[Java] Ready at`, javaPath);
+  return javaPath;
 }
 
-function saveAccounts(data) {
-  const dir = path.dirname(ACCOUNTS_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(data, null, 2));
-}
-
-function generateOfflineUUID(username) {
-  const crypto = require('crypto');
-  const hash = crypto.createHash('md5').update('OfflinePlayer:' + username).digest();
-  hash[6] = (hash[6] & 0x0f) | 0x30;
-  hash[8] = (hash[8] & 0x3f) | 0x80;
-  const hex = hash.toString('hex');
-  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
-}
-
-ipcMain.handle('accounts:list', () => loadAccounts());
-
-ipcMain.handle('accounts:add-offline', (_e, username) => {
-  const data = loadAccounts();
-  const account = {
-    type: 'offline',
-    username,
-    uuid: generateOfflineUUID(username),
-    addedAt: Date.now()
-  };
-  data.accounts.push(account);
-  data.active = account.uuid;
-  saveAccounts(data);
-  return { ok: true, account };
-});
-
-ipcMain.handle('accounts:set-active', (_e, uuid) => {
-  const data = loadAccounts();
-  data.active = uuid;
-  saveAccounts(data);
-  return { ok: true };
-});
-
-ipcMain.handle('accounts:remove', (_e, uuid) => {
-  const data = loadAccounts();
-  data.accounts = data.accounts.filter(a => a.uuid !== uuid);
-  if (data.active === uuid) {
-    data.active = data.accounts[0]?.uuid || null;
-  }
-  saveAccounts(data);
-  return { ok: true };
-});
-
-// ============================================================
-// MINECRAFT
-// ============================================================
-ipcMain.handle('get-versions', async () => {
-  return {
-    ok: true,
-    versions: ['1.21.4', '1.21.1', '1.20.6', '1.20.4', '1.19.4', '1.18.2', '1.16.5', '1.12.2', '1.8.9']
-  };
-});
-
-ipcMain.handle('launch-game', async (_e, { version, username }) => {
-  try {
-    await mc.launchGame(version, username);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
-});
-
-// ============================================================
-// CONTENT HUB (Modrinth only)
-// ============================================================
-ipcMain.handle('search-content', async (_e, { query, contentType, gameVersion, loader }) => {
-  try {
-    const results = await mods.searchModrinthContent(query, contentType, gameVersion, loader);
-    return { ok: true, results };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
-});
-
-ipcMain.handle('install-content', async (event, opts) => {
-  return await installContent({
-    ...opts,
-    source: 'modrinth',
-    onProgress: (progress) => {
-      event.sender.send('install-progress', progress);
-    }
-  });
-});
+module.exports = { ensureJava };
