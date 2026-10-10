@@ -118,4 +118,14 @@ async function loadInstances() {
       <div class="col-span-full text-center py-20">
         <div class="text-5xl mb-4">📚</div>
         <p class="text-text-lo text-sm">No instances yet</p>
-       
+        <p class="text-text-dim text-xs mt-2">Click "New Instance" to create one</p>
+      </div>`;
+    return;
+  }
+
+  const loaderBadges = {
+    vanilla:  '<span class="px-2 py-0.5 rounded bg-bg-raised text-text-dim text-[10px] font-bold">VANILLA</span>',
+    fabric:   '<span class="px-2 py-0.5 rounded bg-accent/20 text-accent text-[10px] font-bold">FABRIC</span>',
+    quilt:    '<span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 text-[10px] font-bold">QUILT</span>',
+    forge:    '<span class="px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 text-[10px] font-bold">FORGE</span>',
+    neoforge: '<span class="px-2 py-0.5 rounded bg-pink-500/20 text-pink-
