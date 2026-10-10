@@ -3,24 +3,14 @@ const path = require('path');
 const https = require('https');
 const os = require('os');
 const extract = require('extract-zip');
-const tar = require('tar');
 
 const JAVA_DIR = path.join(os.homedir(), '.proclient', 'java');
 
-// Adoptium Temurin JRE 21 download URLs per platform
+// Adoptium Temurin JRE 21 — ZIP for all platforms
 const JAVA_URLS = {
-  win32: {
-    url: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_windows_hotspot_21.0.2_13.zip',
-    type: 'zip'
-  },
-  darwin: {
-    url: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_mac_hotspot_21.0.2_13.tar.gz',
-    type: 'tar'
-  },
-  linux: {
-    url: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.tar.gz',
-    type: 'tar'
-  }
+  win32: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_windows_hotspot_21.0.2_13.zip',
+  darwin: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_mac_hotspot_21.0.2_13.zip',
+  linux: 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2%2B13/OpenJDK21U-jre_x64_linux_hotspot_21.0.2_13.zip'
 };
 
 function downloadFile(url, dest) {
@@ -29,8 +19,13 @@ function downloadFile(url, dest) {
     https.get(url, (response) => {
       if (response.statusCode === 302 || response.statusCode === 301) {
         file.close();
-        fs.unlinkSync(dest);
+        fs.unlink(dest, () => {});
         return downloadFile(response.headers.location, dest).then(resolve).catch(reject);
+      }
+      if (response.statusCode !== 200) {
+        file.close();
+        fs.unlink(dest, () => {});
+        return reject(new Error(`Download failed: HTTP ${response.statusCode}`));
       }
       response.pipe(file);
       file.on('finish', () => file.close(resolve));
@@ -44,8 +39,8 @@ function downloadFile(url, dest) {
 
 async function ensureJava() {
   const javaExe = process.platform === 'win32' ? 'bin\\java.exe' : 'bin/java';
-  
-  // Check if already downloaded
+
+  // Check if a local JRE already exists
   if (fs.existsSync(JAVA_DIR)) {
     const entries = fs.readdirSync(JAVA_DIR).filter(e => e.startsWith('jdk-') || e.startsWith('OpenJDK'));
     if (entries.length > 0) {
@@ -57,27 +52,22 @@ async function ensureJava() {
     }
   }
 
-  // Download
+  // Download if missing
   console.log('[Java] Downloading JRE 21...');
   fs.mkdirSync(JAVA_DIR, { recursive: true });
 
-  const { url, type } = JAVA_URLS[process.platform];
-  const archive = path.join(JAVA_DIR, type === 'zip' ? 'jre.zip' : 'jre.tar.gz');
+  const url = JAVA_URLS[process.platform];
+  if (!url) throw new Error(`Unsupported platform: ${process.platform}`);
 
+  const archive = path.join(JAVA_DIR, 'jre.zip');
   await downloadFile(url, archive);
   console.log('[Java] Downloaded. Extracting...');
 
-  if (type === 'zip') {
-    await extract(archive, { dir: JAVA_DIR });
-  } else {
-    await tar.x({ file: archive, cwd: JAVA_DIR });
-  }
-
+  await extract(archive, { dir: JAVA_DIR });
   fs.unlinkSync(archive);
 
-  // Find extracted folder
   const entries = fs.readdirSync(JAVA_DIR).filter(e => e.startsWith('jdk-') || e.startsWith('OpenJDK'));
-  if (!entries.length) throw new Error('Java extraction failed');
+  if (!entries.length) throw new Error('Java extraction failed — no JRE folder found');
 
   const javaPath = path.join(JAVA_DIR, entries[0], javaExe);
   console.log('[Java] Ready at', javaPath);
