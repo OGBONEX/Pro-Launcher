@@ -7,6 +7,7 @@ const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
 const mc = require('./minecraft');
 const instances = require('./instances');
+const { installLoader } = require('./loaders');
 const { installContent } = require('./downloader');
 
 const ACCOUNTS_FILE = path.join(os.homedir(), '.proclient', 'accounts.json');
@@ -165,6 +166,19 @@ ipcMain.handle('instances:delete', (_e, folder) => {
 ipcMain.handle('instances:update', (_e, folder, patch) => {
   try {
     return { ok: true, instance: instances.updateInstance(folder, patch) };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+// ============================================================
+// LOADERS
+// ============================================================
+ipcMain.handle('install-loader', async (_e, { instanceFolder, loaderId, version }) => {
+  try {
+    const instancePath = instances.getInstanceMinecraftDir(instanceFolder);
+    const result = await installLoader(loaderId, version, instancePath);
+    return result;
   } catch (err) {
     return { ok: false, error: err.message };
   }
