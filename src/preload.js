@@ -19,6 +19,13 @@ contextBridge.exposeInMainWorld('proClient', {
 
   installLoader: (opts) => ipcRenderer.invoke('install-loader', opts),
 
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setSettings: (data) => ipcRenderer.invoke('settings:set', data),
+
+  lookupSkin: (username) => ipcRenderer.invoke('skins:lookup', username),
+  uploadSkin: (opts) => ipcRenderer.invoke('skins:upload', opts),
+  getCustomSkin: (username) => ipcRenderer.invoke('skins:get-custom', username),
+
   listAccounts: () => ipcRenderer.invoke('accounts:list'),
   addOfflineAccount: (username) => ipcRenderer.invoke('accounts:add-offline', username),
   setActiveAccount: (uuid) => ipcRenderer.invoke('accounts:set-active', uuid),
