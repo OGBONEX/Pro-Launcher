@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
+const mc = require('./minecraft');
 
 updateElectronApp({ updateInterval: '1 hour' });
 
@@ -39,9 +40,24 @@ ipcMain.on('window-maximize', () => {
 });
 ipcMain.on('window-close', () => mainWindow.close());
 
-// ----- Minecraft (placeholder until Phase 2) -----
-ipcMain.handle('get-versions', async () => []);
-ipcMain.handle('launch-game', async (_e, opts) => ({ ok: true }));
+// ----- Minecraft launch -----
+ipcMain.handle('get-versions', async () => {
+  try {
+    return { ok: true, versions: await mc.getVersions() };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('launch-game', async (_e, { version, username }) => {
+  try {
+    await mc.installVersion(version);
+    await mc.launchGame(version, username);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
 
 // ----- Mod search (Modrinth + CurseForge) -----
 ipcMain.handle('search-mods', async (_e, { query, source, gameVersion, loader }) => {
