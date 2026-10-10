@@ -1,2 +1,2 @@
 # Pro-Launcher
-Cool Minecraft Launcher
+Becoming the best matters to us...
