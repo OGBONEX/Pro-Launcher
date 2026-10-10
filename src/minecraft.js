@@ -11,30 +11,25 @@ const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 const launcher = new Client();
 
-// Java version requirements per Minecraft version [citation:10][citation:16]
+// Java version required per Minecraft version
 function getRequiredJavaVersion(mcVersion) {
-  // Legacy numeric versions
   const versionMatch = mcVersion.match(/^(\d+)\.(\d+)/);
   if (versionMatch) {
     const major = parseInt(versionMatch[1], 10);
     const minor = parseInt(versionMatch[2], 10);
     if (major === 1) {
-      if (minor >= 21) return 21;  // 1.21+
-      if (minor >= 17) return 17;  // 1.17 - 1.20.4
-      if (minor >= 13) return 8;   // 1.13 - 1.16.5
-      return 8;                    // 1.12.2 and older
+      if (minor >= 21) return 21;
+      if (minor >= 17) return 17;
+      return 8;
     }
   }
-  // Snapshot versioning (e.g., "25w14a", "26.1 Snapshot 1")
-  // Snapshots almost always target the upcoming release's Java version
   if (mcVersion.includes('Snapshot') || /^\d{2}w\d{2}/.test(mcVersion)) {
-    return 21; // Modern snapshots run on Java 21
+    return 21;
   }
-  return 21; // Default to newest
+  return 21;
 }
 
 async function fetchManifest(force = false) {
-  // Return cached manifest if fresh
   if (!force && fs.existsSync(CACHE_FILE)) {
     const stat = fs.statSync(CACHE_FILE);
     if (Date.now() - stat.mtimeMs < CACHE_TTL_MS) {
@@ -47,7 +42,6 @@ async function fetchManifest(force = false) {
   if (!res.ok) throw new Error(`Manifest fetch failed: ${res.status}`);
   const data = await res.json();
 
-  // Cache it
   fs.mkdirSync(MC_PATH, { recursive: true });
   fs.writeFileSync(CACHE_FILE, JSON.stringify(data));
 
@@ -57,10 +51,10 @@ async function fetchManifest(force = false) {
 async function getVersions() {
   const manifest = await fetchManifest();
   return {
-    latest: manifest.latest, // { release, snapshot }
+    latest: manifest.latest,
     versions: manifest.versions.map(v => ({
       id: v.id,
-      type: v.type,        // release | snapshot | old_beta | old_alpha
+      type: v.type,
       releaseTime: v.releaseTime
     }))
   };
@@ -70,13 +64,11 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null)
   const requiredJava = getRequiredJavaVersion(versionId);
   console.log(`[Minecraft] Version ${versionId} requires Java ${requiredJava}`);
 
-  // ensureJava should download the right version if we support multiple
   const javaPath = customJavaPath || await ensureJava(requiredJava);
   console.log('[Minecraft] Using Java at:', javaPath);
 
   const auth = offline(username);
 
-  // Determine type from manifest
   const manifest = await fetchManifest();
   const entry = manifest.versions.find(v => v.id === versionId);
   const versionType = entry ? entry.type : 'release';
@@ -86,7 +78,7 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null)
     root: MC_PATH,
     version: {
       number: versionId,
-      type: versionType // MCLC uses 'release' or 'snapshot' [citation:2]
+      type: versionType
     },
     memory: {
       max: '2G',
