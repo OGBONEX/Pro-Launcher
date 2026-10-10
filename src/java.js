@@ -1,106 +1,154 @@
-// ----- Window controls -----
-document.getElementById('min').onclick = () => window.proClient.minimize();
-document.getElementById('max').onclick = () => window.proClient.maximize();
-document.getElementById('close').onclick = () => window.proClient.close();
+require('./discord');
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const { updateElectronApp } = require('update-electron-app');
+const mods = require('./mods');
+const mc = require('./minecraft');
+const { installContent } = require('./downloader');
 
-// ----- Sidebar tab switching -----
-document.querySelectorAll('.sidebar-btn').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+const ACCOUNTS_FILE = path.join(os.homedir(), '.proclient', 'accounts.json');
+
+updateElectronApp({
+  repo: 'OGBONEX/Pro-Launcher',
+  updateInterval: '1 hour'
+});
+
+let mainWindow;
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1100,
+    height: 700,
+    minWidth: 900,
+    minHeight: 600,
+    frame: false,
+    backgroundColor: '#0d0d16',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+}
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
+// ============================================================
+// WINDOW CONTROLS
+// ============================================================
+ipcMain.on('window-minimize', () => mainWindow.minimize());
+ipcMain.on('window-maximize', () => {
+  mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
+});
+ipcMain.on('window-close', () => mainWindow.close());
+
+// ============================================================
+// ACCOUNTS (Offline only)
+// ============================================================
+function loadAccounts() {
+  try {
+    if (fs.existsSync(ACCOUNTS_FILE)) {
+      return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.error('[Accounts] Failed to load:', e);
+  }
+  return { accounts: [], active: null };
+}
+
+function saveAccounts(data) {
+  const dir = path.dirname(ACCOUNTS_FILE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(data, null, 2));
+}
+
+function generateOfflineUUID(username) {
+  const crypto = require('crypto');
+  const hash = crypto.createHash('md5').update('OfflinePlayer:' + username).digest();
+  hash[6] = (hash[6] & 0x0f) | 0x30;
+  hash[8] = (hash[8] & 0x3f) | 0x80;
+  const hex = hash.toString('hex');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
+
+ipcMain.handle('accounts:list', () => loadAccounts());
+
+ipcMain.handle('accounts:add-offline', (_e, username) => {
+  const data = loadAccounts();
+  const account = {
+    type: 'offline',
+    username,
+    uuid: generateOfflineUUID(username),
+    addedAt: Date.now()
+  };
+  data.accounts.push(account);
+  data.active = account.uuid;
+  saveAccounts(data);
+  return { ok: true, account };
+});
+
+ipcMain.handle('accounts:set-active', (_e, uuid) => {
+  const data = loadAccounts();
+  data.active = uuid;
+  saveAccounts(data);
+  return { ok: true };
+});
+
+ipcMain.handle('accounts:remove', (_e, uuid) => {
+  const data = loadAccounts();
+  data.accounts = data.accounts.filter(a => a.uuid !== uuid);
+  if (data.active === uuid) {
+    data.active = data.accounts[0]?.uuid || null;
+  }
+  saveAccounts(data);
+  return { ok: true };
+});
+
+// ============================================================
+// MINECRAFT
+// ============================================================
+ipcMain.handle('get-versions', async () => {
+  return {
+    ok: true,
+    versions: ['1.21.4', '1.21.1', '1.20.6', '1.20.4', '1.19.4', '1.18.2', '1.16.5', '1.12.2', '1.8.9']
   };
 });
 
-// ----- PLAY button -----
-document.getElementById('play').onclick = async () => {
-  const btn = document.getElementById('play');
-  const status = document.getElementById('status');
-  const versionSelect = document.getElementById('version-select');
-  const version = versionSelect ? versionSelect.value : '1.21.4';
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Launching...';
-  status.textContent = 'Downloading Minecraft (first launch may take several minutes)...';
-
-  const result = await window.proClient.launchGame({
-    version,
-    username: 'Player'
-  });
-
-  btn.disabled = false;
-  btn.textContent = '▶ PLAY';
-
-  if (result.ok) {
-    status.textContent = '✅ Minecraft is starting...';
-  } else {
-    status.textContent = '❌ Error: ' + result.error;
+ipcMain.handle('launch-game', async (_e, { version, username }) => {
+  try {
+    await mc.launchGame(version, username);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
   }
-};
+});
 
-// ----- Mods tab -----
-const modsTab = document.getElementById('mods');
-if (modsTab) {
-  modsTab.innerHTML = `
-    <div class="flex h-full">
-      <aside class="w-64 bg-surface-2 p-4 border-r border-surface-4">
-        <h3 class="font-bold mb-4">Filters</h3>
-        <label class="text-sm text-text-secondary">Source</label>
-        <select id="mod-source" class="w-full mt-1 p-2 bg-surface-3 rounded-lg border border-surface-4 text-text-primary focus:border-brand-blue outline-none">
-          <option value="modrinth">Modrinth</option>
-          <option value="curseforge">CurseForge</option>
-        </select>
-      </aside>
-      <div class="flex-1 p-6 overflow-y-auto">
-        <div class="flex gap-2 mb-6">
-          <input id="mod-query" placeholder="Search mods..." class="flex-1 p-3 bg-surface-3 rounded-lg border border-surface-4 text-text-primary focus:border-brand-blue outline-none" />
-          <button id="mod-search-btn" class="px-6 py-3 bg-brand-blue rounded-lg font-semibold hover:bg-blue-600 transition">Search</button>
-        </div>
-        <div id="mod-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
-    </div>
-  `;
+// ============================================================
+// CONTENT HUB (Modrinth only)
+// ============================================================
+ipcMain.handle('search-content', async (_e, { query, contentType, gameVersion, loader }) => {
+  try {
+    const results = await mods.searchModrinthContent(query, contentType, gameVersion, loader);
+    return { ok: true, results };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
 
-  document.getElementById('mod-search-btn').onclick = async () => {
-    const query = document.getElementById('mod-query').value.trim();
-    const source = document.getElementById('mod-source').value;
-    const results = document.getElementById('mod-results');
-
-    if (!query) return;
-    results.innerHTML = '<p class="text-text-secondary">Searching...</p>';
-
-    const res = await window.proClient.searchMods({
-      query,
-      source,
-      gameVersion: '1.21.4',
-      loader: 'fabric'
-    });
-
-    if (!res.ok) {
-      results.innerHTML = `<p class="text-brand-red">Error: ${res.error}</p>`;
-      return;
+ipcMain.handle('install-content', async (event, opts) => {
+  return await installContent({
+    ...opts,
+    source: 'modrinth',
+    onProgress: (progress) => {
+      event.sender.send('install-progress', progress);
     }
-    if (!res.results.length) {
-      results.innerHTML = '<p class="text-text-secondary">No results.</p>';
-      return;
-    }
-
-    results.innerHTML = res.results.map(m => `
-      <div class="bg-surface-3 rounded-xl p-4 border border-surface-4 hover:border-brand-blue transition">
-        <div class="flex items-start gap-3">
-          <div class="w-12 h-12 bg-brand-blue/20 rounded-lg flex items-center justify-center text-xl">🧩</div>
-          <div class="flex-1 min-w-0">
-            <h4 class="font-bold truncate">${m.name}</h4>
-            <p class="text-sm text-text-secondary truncate">by ${m.author}</p>
-          </div>
-        </div>
-        <p class="text-sm text-text-secondary mt-3 line-clamp-2">${m.description || 'No description'}</p>
-        <div class="flex justify-between items-center mt-4">
-          <span class="text-xs text-text-secondary">${(m.downloads || 0).toLocaleString()} downloads</span>
-          <button class="px-3 py-1 bg-brand-blue text-xs rounded-md hover:bg-blue-600 transition">Install</button>
-        </div>
-      </div>
-    `).join('');
-  };
-}
+  });
+});
