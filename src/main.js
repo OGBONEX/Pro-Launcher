@@ -40,9 +40,9 @@ ipcMain.on('window-maximize', () => {
 });
 ipcMain.on('window-close', () => mainWindow.close());
 
-// ----- Minecraft (placeholder until @xmcl works) -----
+// ----- Minecraft -----
 ipcMain.handle('get-versions', async () => {
-  return { ok: true, versions: ['1.21.4'] };
+  return { ok: true, versions: ['1.21.4', '1.21.1', '1.20.6', '1.20.4', '1.19.4', '1.18.2', '1.16.5', '1.12.2', '1.8.9'] };
 });
 
 ipcMain.handle('launch-game', async (_e, { version, username }) => {
@@ -54,7 +54,7 @@ ipcMain.handle('launch-game', async (_e, { version, username }) => {
   }
 });
 
-// ----- Mod search (Modrinth + CurseForge) -----
+// ----- Mod search -----
 ipcMain.handle('search-mods', async (_e, { query, source, gameVersion, loader }) => {
   try {
     if (source === 'modrinth') {
