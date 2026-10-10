@@ -1,15 +1,19 @@
 {
   "name": "pro-client",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Pro Client - Minecraft Launcher",
   "author": "OGBONEX",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OGBONEX/Pro-Launcher.git"
+  },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
     "release": "electron-builder --publish always"
   },
-   "dependencies": {
+  "dependencies": {
     "update-electron-app": "^3.0.0",
     "discord-rpc": "^4.0.1",
     "minecraft-launcher-core": "^3.18.1"
