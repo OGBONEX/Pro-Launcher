@@ -22,6 +22,16 @@
     "publish": {
       "provider": "github",
       "releaseType": "release"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Game"
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "mac": {
+      "target": ["dmg"]
     }
   }
 }
