@@ -7,13 +7,24 @@ const { getLoaderLaunchConfig } = require('./loaders');
 const instances = require('./instances');
 
 const MC_PATH = path.join(os.homedir(), '.proclient');
+const SETTINGS_FILE = path.join(MC_PATH, 'settings.json');
 const MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json';
 const CACHE_FILE = path.join(MC_PATH, 'version_manifest.json');
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
 const launcher = new Client();
 
+function loadSettings() {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch (e) {}
+  return { ram: 2, javaPath: '', discord: true };
+}
+
 function getRequiredJavaVersion(mcVersion) {
+  // 26.x and newer require Java 25
+  if (/^2[6-9]\./.test(mcVersion)) return 25;
+
   const versionMatch = mcVersion.match(/^(\d+)\.(\d+)/);
   if (versionMatch) {
     const major = parseInt(versionMatch[1], 10);
@@ -24,10 +35,11 @@ function getRequiredJavaVersion(mcVersion) {
       return 8;
     }
   }
+  // Modern snapshots target Java 25
   if (mcVersion.includes('Snapshot') || /^\d{2}w\d{2}/.test(mcVersion)) {
-    return 21;
+    return 25;
   }
-  return 21;
+  return 25;
 }
 
 async function fetchManifest(force = false) {
@@ -73,8 +85,9 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null,
     }
   }
 
+  const settings = loadSettings();
   const requiredJava = getRequiredJavaVersion(versionId);
-  const javaPath = customJavaPath || await ensureJava(requiredJava);
+  const javaPath = customJavaPath || settings.javaPath || await ensureJava(requiredJava);
   console.log(`[Minecraft] Using Java ${requiredJava} at`, javaPath);
 
   const auth = offline(username);
@@ -93,6 +106,8 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null,
     console.warn(`[Minecraft] Could not load ${loaderId} config, falling back to vanilla:`, err.message);
   }
 
+  const ram = settings.ram || 2;
+
   const opts = {
     authorization: auth,
     root: instancePath,
@@ -100,7 +115,7 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null,
       number: versionId,
       type: versionType
     },
-    memory: { max: '2G', min: '1G' },
+    memory: { max: `${ram}G`, min: '1G' },
     javaPath: javaPath,
     ...launchConfig
   };
@@ -116,4 +131,4 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null,
   return { started: true };
 }
 
-module.exports = { getVersions, launchGame };
+module.exports = { getVersions, launchGame, loadSettings };
