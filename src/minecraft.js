@@ -3,15 +3,16 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const { ensureJava } = require('./java');
+const { getLoaderLaunchConfig } = require('./loaders');
+const instances = require('./instances');
 
 const MC_PATH = path.join(os.homedir(), '.proclient');
 const MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json';
 const CACHE_FILE = path.join(MC_PATH, 'version_manifest.json');
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CACHE_TTL_MS = 60 * 60 * 1000;
 
 const launcher = new Client();
 
-// Java version required per Minecraft version
 function getRequiredJavaVersion(mcVersion) {
   const versionMatch = mcVersion.match(/^(\d+)\.(\d+)/);
   if (versionMatch) {
@@ -60,12 +61,21 @@ async function getVersions() {
   };
 }
 
-async function launchGame(versionId, username = 'Player', customJavaPath = null) {
-  const requiredJava = getRequiredJavaVersion(versionId);
-  console.log(`[Minecraft] Version ${versionId} requires Java ${requiredJava}`);
+async function launchGame(versionId, username = 'Player', customJavaPath = null, instanceFolder = null) {
+  let instancePath = MC_PATH;
+  let loaderId = 'vanilla';
 
+  if (instanceFolder) {
+    const inst = instances.listInstances().find(i => i.folder === instanceFolder);
+    if (inst) {
+      instancePath = instances.getInstanceMinecraftDir(instanceFolder);
+      loaderId = inst.loader || 'vanilla';
+    }
+  }
+
+  const requiredJava = getRequiredJavaVersion(versionId);
   const javaPath = customJavaPath || await ensureJava(requiredJava);
-  console.log('[Minecraft] Using Java at:', javaPath);
+  console.log(`[Minecraft] Using Java ${requiredJava} at`, javaPath);
 
   const auth = offline(username);
 
@@ -73,18 +83,26 @@ async function launchGame(versionId, username = 'Player', customJavaPath = null)
   const entry = manifest.versions.find(v => v.id === versionId);
   const versionType = entry ? entry.type : 'release';
 
+  let launchConfig = {};
+  try {
+    if (loaderId !== 'vanilla') {
+      launchConfig = await getLoaderLaunchConfig(loaderId, versionId, instancePath);
+      console.log(`[Minecraft] Loader config loaded for ${loaderId}`);
+    }
+  } catch (err) {
+    console.warn(`[Minecraft] Could not load ${loaderId} config, falling back to vanilla:`, err.message);
+  }
+
   const opts = {
     authorization: auth,
-    root: MC_PATH,
+    root: instancePath,
     version: {
       number: versionId,
       type: versionType
     },
-    memory: {
-      max: '2G',
-      min: '1G'
-    },
-    javaPath: javaPath
+    memory: { max: '2G', min: '1G' },
+    javaPath: javaPath,
+    ...launchConfig
   };
 
   launcher.launch(opts);
