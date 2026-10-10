@@ -1,5 +1,5 @@
-/* Pro Client custom styles
-   Only handles things Tailwind CDN can't: drag regions and scrollbars. */
+/* Pro Client — Red & White theme
+   Only handles things Tailwind CDN can't. */
 
 /* Draggable titlebar */
 .titlebar {
@@ -9,25 +9,25 @@
   -webkit-app-region: no-drag;
 }
 
-/* Custom scrollbar (matches Modrinth dark theme) */
+/* Custom scrollbar (light theme) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d0d12;
+  background: #ffffff;
 }
 ::-webkit-scrollbar-thumb {
-  background: #22222e;
+  background: #e5e5e5;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2a3a;
+  background: #d4d4d4;
 }
 
 /* Sidebar active tab */
 .sidebar-btn.active {
-  background: #1a1a26;
+  background: #dc2626;
   color: #ffffff;
   font-weight: 600;
 }
