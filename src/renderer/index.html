@@ -11,66 +11,77 @@
       theme: {
         extend: {
           colors: {
-            'surface-1': '#ffffff',
-            'surface-2': '#fafafa',
-            'surface-3': '#f5f5f5',
-            'surface-4': '#e5e5e5',
-            'surface-5': '#d4d4d4',
-            'text-primary': '#171717',
-            'text-secondary': '#737373',
-            'brand': '#dc2626',
-            'brand-dark': '#b91c1c',
-            'brand-light': '#ef4444'
+            'bg-deep':    '#0a0a12',
+            'bg-base':    '#0d0d16',
+            'bg-panel':   '#14141e',
+            'bg-raised':  '#1a1a26',
+            'border-dim': '#1f1f2e',
+            'border-lit': '#2a2a3f',
+            'text-hi':    '#f0f0f8',
+            'text-lo':    '#8a8aa3',
+            'text-dim':   '#5a5a72',
+            'brand':      '#ff3b3b',
+            'brand-hi':   '#ff5555',
+            'brand-glow': 'rgba(255,59,59,0.35)'
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-surface-1 text-text-primary overflow-hidden">
+<body class="bg-bg-base text-text-hi overflow-hidden">
 
   <!-- Titlebar -->
-  <div class="titlebar absolute top-0 left-0 right-0 h-10 bg-brand text-white border-b border-brand-dark flex justify-between items-center px-3 select-none z-50">
-    <div class="flex items-center gap-2 font-bold">
-      <span class="w-2 h-2 rounded-full bg-white"></span>
-      <span>Pro Client</span>
+  <div class="titlebar absolute top-0 left-0 right-0 h-9 bg-bg-deep/95 backdrop-blur border-b border-border-dim flex justify-between items-center px-3 z-50">
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(255,59,59,0.8)]"></span>
+      <span class="text-xs font-bold tracking-wide text-text-hi">PRO CLIENT</span>
     </div>
-    <div class="flex gap-1">
-      <button id="min" class="w-8 h-7 rounded hover:bg-brand-dark text-white">—</button>
-      <button id="max" class="w-8 h-7 rounded hover:bg-brand-dark text-white">▢</button>
-      <button id="close" class="w-8 h-7 rounded hover:bg-brand-dark text-white">✕</button>
+    <div class="flex gap-0.5">
+      <button id="min" class="w-8 h-7 rounded hover:bg-bg-raised text-text-lo text-sm">—</button>
+      <button id="max" class="w-8 h-7 rounded hover:bg-bg-raised text-text-lo text-sm">▢</button>
+      <button id="close" class="w-8 h-7 rounded hover:bg-brand text-text-lo hover:text-white text-sm">✕</button>
     </div>
   </div>
 
   <!-- App shell -->
-  <div class="pt-10 h-screen flex">
+  <div class="pt-9 h-screen flex">
 
-    <!-- Sidebar -->
-    <aside class="w-56 bg-surface-2 border-r border-surface-4 flex flex-col p-3 gap-1">
-      <div class="px-3 py-3 text-xs uppercase tracking-wider text-text-secondary font-semibold">Navigation</div>
+    <!-- Icon rail -->
+    <aside class="rail w-[80px] flex flex-col items-center py-3">
 
-      <button data-tab="home" class="sidebar-btn active w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-3 transition">
-        🏠 Home
+      <button data-tab="home" class="rail-btn active">
+        <span class="rail-icon">🏠</span>
+        <span>Home</span>
       </button>
-      <button data-tab="mods" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-3 transition">
-        🧩 Mods
+
+      <button data-tab="mods" class="rail-btn">
+        <span class="rail-icon">🧩</span>
+        <span>Mods</span>
       </button>
-      <button data-tab="modpacks" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-3 transition">
-        📦 Modpacks
+
+      <button data-tab="modpacks" class="rail-btn">
+        <span class="rail-icon">📦</span>
+        <span>Packs</span>
       </button>
-      <button data-tab="resourcepacks" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-3 transition">
-        🎨 Resource Packs
+
+      <button data-tab="skins" class="rail-btn">
+        <span class="rail-icon">👤</span>
+        <span>Skins</span>
       </button>
-      <button data-tab="settings" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-3 transition">
-        ⚙️ Settings
+
+      <button data-tab="settings" class="rail-btn">
+        <span class="rail-icon">⚙️</span>
+        <span>Config</span>
       </button>
 
       <div class="flex-1"></div>
 
-      <div class="px-3 py-2 text-xs text-text-secondary">
-        <div>v1.0.9</div>
-        <div id="discord-status" class="text-green-600">● Discord</div>
+      <div class="rail-btn" style="pointer-events:none;" title="Discord Rich Presence">
+        <span class="rail-icon" style="color:#22c55e; font-size:14px;">●</span>
+        <span class="text-text-dim">Online</span>
       </div>
+      <div class="text-[10px] text-text-dim pb-2 tracking-wider">v1.1.0</div>
     </aside>
 
     <!-- Main content -->
@@ -78,13 +89,30 @@
 
       <!-- HOME TAB -->
       <section id="home" class="tab h-full overflow-y-auto p-8">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex items-start justify-between mb-8">
           <div>
-            <h1 class="text-3xl font-bold text-text-primary">Pro Client</h1>
-            <p class="text-text-secondary mt-1">Select a version and hit Play.</p>
+            <h1 class="text-3xl font-bold tracking-tight">Welcome back</h1>
+            <p class="text-text-lo mt-1 text-sm">Ready to jump into your next world?</p>
           </div>
-          <div class="flex gap-2">
-            <select id="version-select" class="px-4 py-2 bg-surface-3 rounded-lg border border-surface-4 text-text-primary focus:border-brand outline-none">
+        </div>
+
+        <!-- Big Play panel (Lunar-style) -->
+        <div class="glass rounded-2xl p-6 mb-8 flex items-center gap-6">
+          <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-brand to-brand-hi flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(255,59,59,0.4)]">
+            ⛏️
+          </div>
+          <div class="flex-1">
+            <h2 class="text-xl font-bold">Minecraft</h2>
+            <p class="text-text-lo text-sm mt-0.5">Latest Release • 1.21.4</p>
+          </div>
+          <div class="flex gap-2 items-center">
+            <input id="username-input"
+                   placeholder="Username"
+                   value="Player"
+                   maxlength="16"
+                   class="px-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none w-40 text-sm" />
+            <select id="version-select"
+                    class="px-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
               <option value="1.21.4">1.21.4</option>
               <option value="1.21.1">1.21.1</option>
               <option value="1.20.6">1.20.6</option>
@@ -95,31 +123,29 @@
               <option value="1.12.2">1.12.2</option>
               <option value="1.8.9">1.8.9</option>
             </select>
-            <button id="play" class="px-6 py-2 bg-brand rounded-lg font-bold text-white hover:bg-brand-dark transition">
+            <button id="play" class="px-8 py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition shadow-[0_0_20px_rgba(255,59,59,0.4)] hover:shadow-[0_0_30px_rgba(255,59,59,0.6)]">
               ▶ PLAY
             </button>
           </div>
         </div>
 
-        <p id="status" class="text-text-secondary text-sm mb-6"></p>
+        <p id="status" class="text-text-lo text-sm mb-6"></p>
 
         <section class="mb-8">
-          <h2 class="text-xl font-semibold mb-4">Jump back in</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-surface-3 rounded-xl p-4 border border-surface-4 hover:border-brand transition cursor-pointer">
-              <div class="w-full h-24 bg-gradient-to-br from-brand to-brand-light rounded-lg mb-3 flex items-center justify-center">
-                <span class="text-3xl">⛏️</span>
-              </div>
-              <h3 class="font-bold">Latest Release</h3>
-              <p class="text-sm text-text-secondary">Minecraft 1.21.4</p>
+          <h2 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-3">Recent</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="glass rounded-xl p-4 hover:border-brand/40 transition cursor-pointer">
+              <div class="w-full h-20 rounded-lg bg-gradient-to-br from-brand/20 to-brand-hi/10 mb-3 flex items-center justify-center text-2xl">🌍</div>
+              <h3 class="font-semibold text-sm">Latest Release</h3>
+              <p class="text-xs text-text-dim mt-0.5">1.21.4 • Vanilla</p>
             </div>
           </div>
         </section>
 
         <section>
-          <h2 class="text-xl font-semibold mb-4">Library</h2>
-          <div class="bg-surface-3 rounded-xl p-8 border border-surface-4 text-center">
-            <p class="text-text-secondary">No instances yet. Click Play to install Minecraft.</p>
+          <h2 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-3">Library</h2>
+          <div class="glass rounded-xl p-8 text-center">
+            <p class="text-text-lo text-sm">No instances yet. Hit Play to install Minecraft.</p>
           </div>
         </section>
       </section>
@@ -130,20 +156,20 @@
       <!-- MODPACKS TAB -->
       <section id="modpacks" class="tab hidden h-full p-8 overflow-y-auto">
         <h2 class="text-2xl font-bold mb-2">Modpacks</h2>
-        <p class="text-text-secondary">Modpack browser coming soon.</p>
+        <p class="text-text-lo">Modpack browser coming soon.</p>
       </section>
 
-      <!-- RESOURCE PACKS TAB -->
-      <section id="resourcepacks" class="tab hidden h-full p-8 overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-2">Resource Packs</h2>
-        <p class="text-text-secondary">Browse resource packs coming soon.</p>
+      <!-- SKINS TAB -->
+      <section id="skins" class="tab hidden h-full p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-2">Skins</h2>
+        <p class="text-text-lo">Skin system coming soon.</p>
       </section>
 
       <!-- SETTINGS TAB -->
       <section id="settings" class="tab hidden h-full p-8 overflow-y-auto">
         <h2 class="text-2xl font-bold mb-4">Settings</h2>
-        <div class="bg-surface-3 rounded-xl p-6 border border-surface-4">
-          <p class="text-text-secondary">Settings coming soon.</p>
+        <div class="glass rounded-xl p-6">
+          <p class="text-text-lo text-sm">Settings coming soon.</p>
         </div>
       </section>
 
