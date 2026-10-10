@@ -5,7 +5,14 @@ const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
 const mc = require('./minecraft');
 
-updateElectronApp({ updateInterval: '1 hour' });
+updateElectronApp({
+  updateInterval: '1 hour',
+  repo: 'OGBONEX/Pro-Launcher',
+  updateSource: {
+    type: 'GitHub',
+    repo: 'OGBONEX/Pro-Launcher'
+  }
+});
 
 let mainWindow;
 
