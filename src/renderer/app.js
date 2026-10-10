@@ -25,7 +25,6 @@ document.getElementById('play').onclick = async () => {
   const status = document.getElementById('status');
   const version = document.getElementById('version-select').value;
 
-  // Get active account
   const accountsData = await window.proClient.listAccounts();
   const active = accountsData.accounts.find(a => a.uuid === accountsData.active);
 
@@ -57,7 +56,6 @@ document.getElementById('play').onclick = async () => {
   }
 };
 
-// Update home version label
 document.getElementById('version-select').onchange = (e) => {
   document.getElementById('home-version').textContent = e.target.value;
 };
@@ -78,9 +76,7 @@ document.querySelectorAll('.content-type-tab').forEach(tab => {
 
 document.getElementById('content-search-btn').onclick = async () => {
   const query = document.getElementById('content-query').value.trim();
-  const sourceSelect = document.getElementById('content-source').value;
   const results = document.getElementById('content-results');
-  const source = sourceSelect === 'proclient' ? 'modrinth' : 'curseforge';
 
   if (!query) return;
 
@@ -88,7 +84,6 @@ document.getElementById('content-search-btn').onclick = async () => {
 
   const res = await window.proClient.searchContent({
     query,
-    source,
     contentType: currentContentType,
     gameVersion: '1.21.4',
     loader: 'fabric'
@@ -120,11 +115,55 @@ document.getElementById('content-search-btn').onclick = async () => {
       <p class="text-xs text-text-lo mt-3 line-clamp-2">${item.description || 'No description'}</p>
       <div class="flex justify-between items-center mt-4">
         <span class="text-[10px] text-text-dim">${(item.downloads || 0).toLocaleString()} downloads</span>
-        <button class="px-3 py-1 bg-brand text-white text-xs rounded-md hover:bg-brand-hi transition font-semibold">Install</button>
+        <button class="install-btn px-3 py-1 bg-brand text-white text-xs rounded-md hover:bg-brand-hi transition font-semibold"
+                data-id="${item.id}"
+                data-type="${currentContentType}"
+                data-name="${item.name}">
+          Install
+        </button>
       </div>
     </div>
   `).join('');
+
+  results.querySelectorAll('.install-btn').forEach(btn => {
+    btn.onclick = () => handleInstall(btn);
+  });
 };
+
+async function handleInstall(btn) {
+  const projectId = btn.dataset.id;
+  const contentType = btn.dataset.type;
+  const name = btn.dataset.name;
+
+  btn.disabled = true;
+  btn.textContent = 'Installing...';
+  btn.className = 'install-btn px-3 py-1 bg-bg-raised text-text-lo text-xs rounded-md cursor-wait';
+
+  const result = await window.proClient.installContent({
+    source: 'modrinth',
+    projectId,
+    contentType,
+    gameVersion: '1.21.4',
+    loader: 'fabric'
+  });
+
+  if (result.ok) {
+    btn.textContent = '✅ Installed';
+    btn.className = 'install-btn px-3 py-1 bg-green-600 text-white text-xs rounded-md';
+  } else {
+    btn.textContent = '❌ Failed';
+    btn.className = 'install-btn px-3 py-1 bg-brand-dark text-white text-xs rounded-md';
+    console.error('Install error:', result.error);
+    alert(`Failed to install ${name}:\n\n${result.error}`);
+  }
+}
+
+// Optional live progress logger
+if (window.proClient.onInstallProgress) {
+  window.proClient.onInstallProgress((data) => {
+    console.log('[Install progress]', data);
+  });
+}
 
 // ============================================================
 // ACCOUNT SYSTEM
@@ -155,12 +194,14 @@ accountModal.onclick = (e) => {
 
 document.getElementById('add-account-btn').onclick = () => showView(accountTypeView);
 document.getElementById('back-to-list').onclick = () => showView(accountListView);
+
 document.getElementById('add-offline-btn').onclick = () => {
   document.getElementById('offline-username').value = '';
   document.getElementById('offline-error').classList.add('hidden');
   showView(offlineView);
   setTimeout(() => document.getElementById('offline-username').focus(), 50);
 };
+
 document.getElementById('back-to-types').onclick = () => showView(accountTypeView);
 
 document.getElementById('add-microsoft-btn').onclick = () => {
@@ -227,5 +268,4 @@ async function updateRailUsername() {
   }
 }
 
-// Initialize
 updateRailUsername();
