@@ -6,6 +6,7 @@ const os = require('os');
 const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
 const mc = require('./minecraft');
+const { installContent } = require('./downloader');
 
 const ACCOUNTS_FILE = path.join(os.homedir(), '.proclient', 'accounts.json');
 
@@ -23,7 +24,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     frame: false,
-    backgroundColor: '#0d0d16',
+    backgroundColor: '#0d0d18',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -40,7 +41,9 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// ----- Window controls -----
+// ============================================================
+// WINDOW CONTROLS
+// ============================================================
 ipcMain.on('window-minimize', () => mainWindow.minimize());
 ipcMain.on('window-maximize', () => {
   mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
@@ -48,9 +51,8 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => mainWindow.close());
 
 // ============================================================
-// ACCOUNTS (Offline only for now)
+// ACCOUNTS
 // ============================================================
-
 function loadAccounts() {
   try {
     if (fs.existsSync(ACCOUNTS_FILE)) {
@@ -113,9 +115,13 @@ ipcMain.handle('accounts:remove', (_e, uuid) => {
 // ============================================================
 // MINECRAFT
 // ============================================================
-
 ipcMain.handle('get-versions', async () => {
-  return { ok: true, versions: ['1.21.4', '1.21.1', '1.20.6', '1.20.4', '1.19.4', '1.18.2', '1.16.5', '1.12.2', '1.8.9'] };
+  try {
+    const data = await mc.getVersions();
+    return { ok: true, ...data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 });
 
 ipcMain.handle('launch-game', async (_e, { version, username }) => {
@@ -130,17 +136,21 @@ ipcMain.handle('launch-game', async (_e, { version, username }) => {
 // ============================================================
 // CONTENT HUB
 // ============================================================
-
-ipcMain.handle('search-content', async (_e, { query, source, contentType, gameVersion, loader }) => {
+ipcMain.handle('search-content', async (_e, { query, contentType, gameVersion, loader }) => {
   try {
-    if (source === 'modrinth') {
-      return { ok: true, results: await mods.searchModrinthContent(query, contentType, gameVersion, loader) };
-    } else if (source === 'curseforge') {
-      const loaderId = loader === 'fabric' ? 4 : 1;
-      return { ok: true, results: await mods.searchCurseForgeContent(query, contentType, gameVersion, loaderId) };
-    }
-    return { ok: false, error: 'Unknown source' };
+    const results = await mods.searchModrinthContent(query, contentType, gameVersion, loader);
+    return { ok: true, results };
   } catch (err) {
     return { ok: false, error: err.message };
   }
+});
+
+ipcMain.handle('install-content', async (event, opts) => {
+  return await installContent({
+    ...opts,
+    source: 'modrinth',
+    onProgress: (progress) => {
+      event.sender.send('install-progress', progress);
+    }
+  });
 });
