@@ -28,6 +28,11 @@
   "build": {
     "appId": "com.proclient.launcher",
     "productName": "Pro Client",
+    "files": [
+      "src/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
     "publish": {
       "provider": "github",
       "releaseType": "release"
