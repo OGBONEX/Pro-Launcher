@@ -1,41 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pro Client</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'surface-1': '#0d0d12',
+            'surface-2': '#10101a',
+            'surface-3': '#14141c',
+            'surface-4': '#1a1a26',
+            'surface-5': '#22222e',
+            'text-primary': '#e6e6f0',
+            'text-secondary': '#a0a0b8',
+            'brand-red': '#ff3b3b',
+            'brand-blue': '#3b7bff'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-  <div class="titlebar">
-    <div class="title">
-      <span class="pro">Pro</span> <span class="client">Client</span>
+<body class="bg-surface-1 text-text-primary overflow-hidden">
+
+  <!-- Custom titlebar (draggable) -->
+  <div class="titlebar absolute top-0 left-0 right-0 h-10 bg-surface-3 border-b border-surface-4 flex justify-between items-center px-3 select-none z-50" style="-webkit-app-region: drag;">
+    <div class="flex items-center gap-2 font-bold">
+      <span class="w-2 h-2 rounded-full bg-brand-red"></span>
+      <span class="text-brand-red">Pro</span>
+      <span class="text-brand-blue">Client</span>
     </div>
-    <div class="controls">
-      <button id="min">—</button>
-      <button id="max">▢</button>
-      <button id="close">✕</button>
+    <div class="flex gap-1" style="-webkit-app-region: no-drag;">
+      <button id="min" class="w-8 h-7 rounded hover:bg-surface-5 text-text-secondary">—</button>
+      <button id="max" class="w-8 h-7 rounded hover:bg-surface-5 text-text-secondary">▢</button>
+      <button id="close" class="w-8 h-7 rounded hover:bg-brand-red text-text-secondary">✕</button>
     </div>
   </div>
 
-  <div class="sidebar">
-    <button data-tab="home" class="active">Home</button>
-    <button data-tab="mods">Mods</button>
-    <button data-tab="modpacks">Modpacks</button>
-    <button data-tab="resourcepacks">Resource Packs</button>
-    <button data-tab="settings">Settings</button>
+  <!-- App shell -->
+  <div class="pt-10 h-screen flex">
+
+    <!-- Sidebar -->
+    <aside class="w-56 bg-surface-2 border-r border-surface-4 flex flex-col p-3 gap-1">
+      <div class="px-3 py-3 text-xs uppercase tracking-wider text-text-secondary font-semibold">Navigation</div>
+
+      <button data-tab="home" class="sidebar-btn active w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-4 transition">
+        🏠 Home
+      </button>
+      <button data-tab="mods" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-4 transition">
+        🧩 Mods
+      </button>
+      <button data-tab="modpacks" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-4 transition">
+        📦 Modpacks
+      </button>
+      <button data-tab="resourcepacks" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-4 transition">
+        🎨 Resource Packs
+      </button>
+      <button data-tab="settings" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-surface-4 transition">
+        ⚙️ Settings
+      </button>
+
+      <div class="flex-1"></div>
+
+      <div class="px-3 py-2 text-xs text-text-secondary">
+        <div>v1.0.9</div>
+        <div id="discord-status" class="text-green-400">● Discord</div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1 overflow-hidden">
+
+      <!-- HOME TAB -->
+      <section id="home" class="tab h-full overflow-y-auto p-8">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-3xl font-bold">
+              <span class="text-brand-red">Pro</span> <span class="text-brand-blue">Client</span>
+            </h1>
+            <p class="text-text-secondary mt-1">Select a version and hit Play.</p>
+          </div>
+          <div class="flex gap-2">
+            <select id="version-select" class="px-4 py-2 bg-surface-3 rounded-lg border border-surface-4 text-text-primary focus:border-brand-blue outline-none">
+              <option value="1.21.4">1.21.4</option>
+              <option value="1.21.1">1.21.1</option>
+              <option value="1.20.6">1.20.6</option>
+              <option value="1.20.4">1.20.4</option>
+              <option value="1.19.4">1.19.4</option>
+              <option value="1.18.2">1.18.2</option>
+              <option value="1.16.5">1.16.5</option>
+              <option value="1.12.2">1.12.2</option>
+              <option value="1.8.9">1.8.9</option>
+            </select>
+            <button id="play" class="px-6 py-2 bg-gradient-to-r from-brand-red to-brand-blue rounded-lg font-bold text-white hover:opacity-90 transition">
+              ▶ PLAY
+            </button>
+          </div>
+        </div>
+
+        <p id="status" class="text-text-secondary text-sm mb-6"></p>
+
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">Jump back in</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-surface-3 rounded-xl p-4 border border-surface-4 hover:border-brand-blue transition cursor-pointer">
+              <div class="w-full h-24 bg-gradient-to-br from-brand-red/20 to-brand-blue/20 rounded-lg mb-3 flex items-center justify-center">
+                <span class="text-3xl">⛏️</span>
+              </div>
+              <h3 class="font-bold">Latest Release</h3>
+              <p class="text-sm text-text-secondary">Minecraft 1.21.4</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-semibold mb-4">Library</h2>
+          <div class="bg-surface-3 rounded-xl p-8 border border-surface-4 text-center">
+            <p class="text-text-secondary">No instances yet. Click Play to install Minecraft.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- MODS TAB -->
+      <section id="mods" class="tab hidden h-full overflow-hidden"></section>
+
+      <!-- MODPACKS TAB -->
+      <section id="modpacks" class="tab hidden h-full p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-2">Modpacks</h2>
+        <p class="text-text-secondary">Modpack browser coming soon.</p>
+      </section>
+
+      <!-- RESOURCE PACKS TAB -->
+      <section id="resourcepacks" class="tab hidden h-full p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-2">Resource Packs</h2>
+        <p class="text-text-secondary">PacksMC integration coming soon.</p>
+      </section>
+
+      <!-- SETTINGS TAB -->
+      <section id="settings" class="tab hidden h-full p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4">Settings</h2>
+        <div class="bg-surface-3 rounded-xl p-6 border border-surface-4">
+          <p class="text-text-secondary">Settings coming soon.</p>
+        </div>
+      </section>
+
+    </main>
   </div>
 
-  <main class="content">
-    <section id="home" class="tab active">
-      <h1><span class="pro">Pro</span> <span class="client">Client</span></h1>
-      <p>Select a version and hit Play.</p>
-      <button class="play-btn" id="play">▶ PLAY</button>
-    </section>
-    <section id="mods" class="tab"><h2>Mods</h2><p>Modrinth / CurseForge browser coming soon.</p></section>
-    <section id="modpacks" class="tab"><h2>Modpacks</h2><p>Modpack browser coming soon.</p></section>
-    <section id="resourcepacks" class="tab"><h2>Resource Packs</h2><p>PacksMC integration coming soon.</p></section>
-    <section id="settings" class="tab"><h2>Settings</h2></section>
-  </main>
+  <style>
+    /* Sidebar active state */
+    .sidebar-btn.active {
+      background: #1a1a26;
+      color: #fff;
+      font-weight: 600;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0d0d12; }
+    ::-webkit-scrollbar-thumb { background: #22222e; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2a2a3a; }
+  </style>
 
   <script src="app.js"></script>
 </body>
