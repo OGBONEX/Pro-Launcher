@@ -40,23 +40,13 @@ ipcMain.on('window-maximize', () => {
 });
 ipcMain.on('window-close', () => mainWindow.close());
 
-// ----- Minecraft launch -----
+// ----- Minecraft (placeholder until @xmcl works) -----
 ipcMain.handle('get-versions', async () => {
-  try {
-    return { ok: true, versions: await mc.getVersions() };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
+  return { ok: true, versions: ['1.21.4'] };
 });
 
 ipcMain.handle('launch-game', async (_e, { version, username }) => {
-  try {
-    await mc.installVersion(version);
-    await mc.launchGame(version, username);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
+  return { ok: false, error: 'Minecraft launch coming in a future update' };
 });
 
 // ----- Mod search (Modrinth + CurseForge) -----
