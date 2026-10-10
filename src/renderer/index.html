@@ -58,6 +58,11 @@
         <span>Home</span>
       </button>
 
+      <button data-tab="library" class="rail-btn">
+        <span class="rail-icon">📚</span>
+        <span>Library</span>
+      </button>
+
       <button data-tab="content" class="rail-btn">
         <span class="rail-icon">🧩</span>
         <span>Content</span>
@@ -84,7 +89,7 @@
         <span class="rail-icon" style="color:#22c55e; font-size:14px;">●</span>
         <span class="text-text-dim">Online</span>
       </div>
-      <div class="text-[10px] text-text-dim pb-2 tracking-wider">v1.1.4</div>
+      <div class="text-[10px] text-text-dim pb-2 tracking-wider">v1.2.0</div>
     </aside>
 
     <!-- Main content -->
@@ -97,7 +102,6 @@
           <p class="text-text-lo mt-1 text-sm">Ready to jump into your next world?</p>
         </div>
 
-        <!-- Play panel -->
         <div class="glass rounded-2xl p-6 mb-8 flex items-center gap-6">
           <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-brand via-brand to-accent flex items-center justify-center text-4xl shadow-[0_0_30px_rgba(255,59,59,0.4)]">
             ⛏️
@@ -111,4 +115,303 @@
                     class="px-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
               <option value="">Loading versions...</option>
             </select>
-            <button id="play" class="px-8 py-3 bg-gradient-to
+            <button id="play" class="px-8 py-3 bg-gradient-to-r from-brand to-brand-hi rounded-xl font-bold text-white hover:from-brand-hi hover:to-accent transition shadow-[0_0_20px_rgba(255,59,59,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+              ▶ PLAY
+            </button>
+          </div>
+        </div>
+
+        <p id="status" class="text-text-lo text-sm mb-6"></p>
+
+        <section class="mb-8">
+          <h2 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-3">Recent</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="glass rounded-xl p-4 hover:border-accent/40 transition cursor-pointer">
+              <div class="w-full h-20 rounded-lg bg-gradient-to-br from-brand/20 to-accent/20 mb-3 flex items-center justify-center text-2xl">🌍</div>
+              <h3 class="font-semibold text-sm">Latest Release</h3>
+              <p class="text-xs text-text-dim mt-0.5">Vanilla</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-3">Library</h2>
+          <div class="glass rounded-xl p-8 text-center">
+            <p class="text-text-lo text-sm">No instances yet. Go to Library to create one.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- LIBRARY TAB -->
+      <section id="library" class="tab hidden h-full flex flex-col">
+        <div class="px-8 pt-6 pb-4 border-b border-border-dim flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-bold">Library</h2>
+            <p class="text-text-lo text-sm mt-1">Your installed instances</p>
+          </div>
+          <button id="new-instance-btn"
+                  class="px-6 py-2.5 bg-brand rounded-xl font-semibold text-white hover:bg-brand-hi transition text-sm">
+            + New Instance
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-8 py-6">
+          <div id="library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="col-span-full text-center py-20">
+              <div class="text-5xl mb-4">📚</div>
+              <p class="text-text-lo text-sm">No instances yet</p>
+              <p class="text-text-dim text-xs mt-2">Click "New Instance" to create one</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTENT HUB TAB -->
+      <section id="content" class="tab hidden h-full flex flex-col">
+        <div class="px-8 pt-6 pb-4 border-b border-border-dim">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex-1 relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim">🔍</span>
+              <input id="content-query"
+                     placeholder="Search mods, modpacks, resource packs..."
+                     class="w-full pl-11 pr-4 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-accent outline-none text-sm" />
+            </div>
+            <button id="content-search-btn"
+                    class="px-8 py-3 bg-accent rounded-xl font-bold text-white hover:bg-accent-hi transition text-sm">
+              Search
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-text-dim mr-1">Filter:</span>
+            <select id="content-version"
+                    class="px-3 py-1.5 bg-bg-raised/60 rounded-lg border border-border-dim text-text-hi text-xs outline-none hover:border-accent/40">
+              <option value="1.21.4">1.21.4</option>
+              <option value="1.21.1">1.21.1</option>
+              <option value="1.20.6">1.20.6</option>
+              <option value="1.20.4">1.20.4</option>
+              <option value="1.19.4">1.19.4</option>
+              <option value="1.18.2">1.18.2</option>
+              <option value="1.16.5">1.16.5</option>
+              <option value="1.12.2">1.12.2</option>
+              <option value="1.8.9">1.8.9</option>
+            </select>
+            <select id="content-loader"
+                    class="px-3 py-1.5 bg-bg-raised/60 rounded-lg border border-border-dim text-text-hi text-xs outline-none hover:border-accent/40">
+              <option value="fabric">Fabric</option>
+              <option value="forge">Forge</option>
+              <option value="quilt">Quilt</option>
+              <option value="neoforge">NeoForge</option>
+            </select>
+            <div class="flex-1"></div>
+            <span id="content-count" class="text-xs text-text-dim"></span>
+          </div>
+        </div>
+
+        <div class="flex gap-1 px-8 pt-4">
+          <button class="content-type-tab active" data-type="modpack">📦 Modpacks</button>
+          <button class="content-type-tab" data-type="mod">🧩 Mods</button>
+          <button class="content-type-tab" data-type="resourcepack">🎨 Resource Packs</button>
+          <button class="content-type-tab" data-type="datapack">🗂️ Data Packs</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-8 py-6">
+          <div id="content-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="col-span-full text-center py-20">
+              <div class="text-5xl mb-4">🔎</div>
+              <p class="text-text-lo text-sm">Search for content to install</p>
+              <p class="text-text-dim text-xs mt-2">Powered by Modrinth</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKINS TAB -->
+      <section id="skins" class="tab hidden h-full p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-2">Skins</h2>
+        <p class="text-text-lo text-sm">Skin system coming soon.</p>
+      </section>
+
+      <!-- SETTINGS TAB -->
+      <section id="settings" class="tab hidden h-full p-8 overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4">Settings</h2>
+        <div class="glass rounded-xl p-6">
+          <p class="text-text-lo text-sm">Settings coming soon.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ACCOUNT MODAL -->
+  <div id="account-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center">
+    <div class="glass rounded-2xl p-6 w-[420px] max-w-[90vw]">
+
+      <div id="account-list-view">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">Accounts</h3>
+          <button id="close-account-modal" class="text-text-lo hover:text-text-hi text-xl leading-none">✕</button>
+        </div>
+
+        <div id="account-list" class="space-y-2 mb-4 max-h-[300px] overflow-y-auto"></div>
+
+        <button id="add-account-btn"
+                class="w-full py-3 bg-bg-raised/80 rounded-xl border border-border-dim hover:border-brand/40 transition text-sm font-semibold flex items-center justify-center gap-2">
+          <span class="text-lg">+</span> Add Account
+        </button>
+      </div>
+
+      <div id="account-type-view" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">Add Account</h3>
+          <button id="back-to-list" class="text-text-lo hover:text-text-hi text-sm">← Back</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button id="add-microsoft-btn"
+                  class="glass rounded-xl p-6 hover:border-brand/40 transition flex flex-col items-center gap-2 opacity-50 cursor-not-allowed"
+                  title="Coming soon">
+            <span class="text-3xl">🔷</span>
+            <span class="text-sm font-semibold">Microsoft</span>
+            <span class="text-[10px] text-text-dim">Coming soon</span>
+          </button>
+          <button id="add-offline-btn"
+                  class="glass rounded-xl p-6 hover:border-brand/40 transition flex flex-col items-center gap-2">
+            <span class="text-3xl">👤</span>
+            <span class="text-sm font-semibold">Offline</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="offline-view" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold">Offline Account</h3>
+          <button id="back-to-types" class="text-text-lo hover:text-text-hi text-sm">← Back</button>
+        </div>
+
+        <input id="offline-username"
+               placeholder="Enter username (3-16 chars)"
+               maxlength="16"
+               class="w-full p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm mb-2" />
+
+        <p id="offline-error" class="text-brand text-xs mb-3 hidden"></p>
+
+        <button id="confirm-offline-btn"
+                class="w-full py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition">
+          Add Account
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INSTALL WIZARD MODAL -->
+  <div id="install-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center">
+    <div class="glass rounded-2xl p-6 w-[480px] max-w-[90vw]">
+
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold">Install</h3>
+        <button id="close-install-modal" class="text-text-lo hover:text-text-hi text-xl leading-none">✕</button>
+      </div>
+
+      <div class="flex items-center gap-4 mb-5 p-3 bg-bg-raised/50 rounded-xl border border-border-dim">
+        <div id="install-icon" class="w-14 h-14 bg-gradient-to-br from-brand to-accent rounded-lg flex items-center justify-center text-2xl">
+          📦
+        </div>
+        <div class="flex-1 min-w-0">
+          <h4 id="install-name" class="font-bold text-sm truncate">Mod Name</h4>
+          <p id="install-author" class="text-xs text-text-lo truncate">by Author</p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Install to</label>
+        <select id="install-instance"
+                class="w-full mt-2 p-3 bg-bg-raised/80 rounded-lg border border-border-dim text-text-hi text-sm outline-none focus:border-accent">
+          <option value="">Global mods folder</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div>
+          <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Game Version</label>
+          <select id="install-version" class="w-full mt-2 p-2.5 bg-bg-raised/80 rounded-lg border border-border-dim text-text-hi text-sm outline-none focus:border-accent">
+            <option value="1.21.4">1.21.4</option>
+            <option value="1.21.1">1.21.1</option>
+            <option value="1.20.6">1.20.6</option>
+            <option value="1.20.4">1.20.4</option>
+            <option value="1.19.4">1.19.4</option>
+            <option value="1.18.2">1.18.2</option>
+            <option value="1.16.5">1.16.5</option>
+            <option value="1.12.2">1.12.2</option>
+            <option value="1.8.9">1.8.9</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Loader</label>
+          <select id="install-loader" class="w-full mt-2 p-2.5 bg-bg-raised/80 rounded-lg border border-border-dim text-text-hi text-sm outline-none focus:border-accent">
+            <option value="fabric">Fabric</option>
+            <option value="forge">Forge</option>
+            <option value="quilt">Quilt</option>
+            <option value="neoforge">NeoForge</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="install-progress-wrap" class="hidden mb-4">
+        <div class="flex justify-between text-xs text-text-lo mb-2">
+          <span id="install-stage">Preparing...</span>
+          <span id="install-percent">0%</span>
+        </div>
+        <div class="w-full h-2 bg-bg-deep rounded-full overflow-hidden">
+          <div id="install-progress-bar" class="h-full bg-gradient-to-r from-brand to-accent transition-all duration-200" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="cancel-install-btn" class="flex-1 py-3 bg-bg-raised/80 rounded-xl border border-border-dim text-sm font-semibold hover:border-accent/40 transition">
+          Cancel
+        </button>
+        <button id="confirm-install-btn" class="flex-1 py-3 bg-accent hover:bg-accent-hi rounded-xl text-sm font-bold text-white transition">
+          Install Now
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NEW INSTANCE MODAL -->
+  <div id="new-instance-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center">
+    <div class="glass rounded-2xl p-6 w-[440px] max-w-[90vw]">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold">New Instance</h3>
+        <button id="close-new-instance" class="text-text-lo hover:text-text-hi text-xl leading-none">✕</button>
+      </div>
+
+      <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Name</label>
+      <input id="new-instance-name" placeholder="My Instance" maxlength="40"
+             class="w-full mt-2 mb-4 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm" />
+
+      <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Version</label>
+      <select id="new-instance-version"
+              class="w-full mt-2 mb-4 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
+        <option value="">Loading...</option>
+      </select>
+
+      <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Mod Loader</label>
+      <select id="new-instance-loader"
+              class="w-full mt-2 mb-5 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
+        <option value="vanilla">Vanilla</option>
+        <option value="fabric">Fabric</option>
+      </select>
+
+      <button id="create-instance-btn"
+              class="w-full py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition">
+        Create Instance
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
