@@ -1,6 +1,6 @@
 {
   "name": "pro-client",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Pro Client - Minecraft Launcher",
   "author": "OGBONEX",
   "main": "src/main.js",
@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "update-electron-app": "^3.0.0",
-    "discord-rpc": "^4.0.1"
+    "discord-rpc": "^4.0.1",
+    "@xmcl/core": "^2.16.2",
+    "@xmcl/installer": "^6.3.4"
   },
   "devDependencies": {
     "electron": "^31.0.0",
