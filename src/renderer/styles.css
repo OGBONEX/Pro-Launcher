@@ -1,0 +1,56 @@
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body {
+  background: #0d0d12;
+  color: #e6e6f0;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: 40px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+.titlebar {
+  grid-column: 1 / -1;
+  -webkit-app-region: drag;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  background: #14141c;
+  border-bottom: 1px solid #22222e;
+}
+.titlebar .title { font-weight: 700; }
+.pro { color: #ff3b3b; }
+.client { color: #3b7bff; }
+.controls { -webkit-app-region: no-drag; display: flex; gap: 6px; }
+.controls button {
+  width: 28px; height: 24px;
+  background: transparent; color: #e6e6f0;
+  border: none; cursor: pointer; border-radius: 4px;
+}
+.controls button:hover { background: #22222e; }
+#close:hover { background: #ff3b3b; }
+.sidebar {
+  background: #10101a;
+  padding: 16px 8px;
+  display: flex; flex-direction: column; gap: 6px;
+  border-right: 1px solid #22222e;
+}
+.sidebar button {
+  background: transparent; color: #a0a0b8;
+  border: none; padding: 10px 12px; text-align: left;
+  border-radius: 6px; cursor: pointer; font-size: 14px;
+}
+.sidebar button:hover { background: #1a1a26; color: #fff; }
+.sidebar button.active { background: #1e1e2e; color: #fff; }
+.content { padding: 32px; overflow-y: auto; }
+.tab { display: none; }
+.tab.active { display: block; }
+.play-btn {
+  margin-top: 24px;
+  padding: 14px 40px;
+  font-size: 18px; font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #ff3b3b, #3b7bff);
+  border: none; border-radius: 8px; cursor: pointer;
+}
+.play-btn:hover { opacity: 0.9; }
