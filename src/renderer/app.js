@@ -13,14 +13,30 @@ document.querySelectorAll('.sidebar button').forEach(btn => {
   };
 });
 
-// ----- PLAY button -----
+// ----- PLAY button (real Minecraft launch) -----
 document.getElementById('play').onclick = async () => {
   const btn = document.getElementById('play');
-  btn.textContent = 'Launching...';
+  const status = document.getElementById('status') || document.createElement('p');
+  status.id = 'status';
+  btn.parentNode.appendChild(status);
+  
+  btn.textContent = 'Installing...';
   btn.disabled = true;
-  const result = await window.proClient.launchGame({ version: '1.21.4' });
-  btn.textContent = result.ok ? '▶ PLAY' : 'Error';
+  status.textContent = 'Downloading Minecraft files... (this may take a few minutes)';
+  
+  const version = '1.21.4';
+  const username = 'Player';
+  
+  const result = await window.proClient.launchGame({ version, username });
+  
+  btn.textContent = '▶ PLAY';
   btn.disabled = false;
+  
+  if (result.ok) {
+    status.textContent = 'Minecraft launched!';
+  } else {
+    status.textContent = 'Error: ' + result.error;
+  }
 };
 
 // ----- Mods tab (search) -----
