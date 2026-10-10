@@ -1,18 +1,18 @@
-/* Pro Client — Lunar Client style */
+/* Pro Client — Red & Blue theme */
 
 .titlebar { -webkit-app-region: drag; }
 .titlebar button { -webkit-app-region: no-drag; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #0a0a12; }
-::-webkit-scrollbar-thumb { background: #1f1f2e; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #2a2a3f; }
+::-webkit-scrollbar-track { background: #0a0a14; }
+::-webkit-scrollbar-thumb { background: #1f1f30; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2a42; }
 
 /* Icon rail */
 .rail {
-  background: linear-gradient(180deg, #0f0f18 0%, #0a0a12 100%);
-  border-right: 1px solid #1a1a26;
+  background: linear-gradient(180deg, #10101c 0%, #0a0a14 100%);
+  border-right: 1px solid #1a1a2a;
 }
 
 .rail-btn {
@@ -25,7 +25,7 @@
   width: 60px;
   height: 60px;
   border-radius: 10px;
-  color: #6b6b85;
+  color: #6b6b88;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -35,14 +35,17 @@
   background: transparent;
   margin: 2px 0;
 }
+
 .rail-btn:hover {
-  background: rgba(255, 59, 59, 0.08);
+  background: rgba(59, 130, 246, 0.08);
   color: #e6e6f0;
 }
+
 .rail-btn.active {
-  background: rgba(255, 59, 59, 0.15);
+  background: linear-gradient(135deg, rgba(255, 59, 59, 0.18) 0%, rgba(59, 130, 246, 0.18) 100%);
   color: #ffffff;
 }
+
 .rail-btn.active::before {
   content: '';
   position: absolute;
@@ -51,16 +54,18 @@
   transform: translateY(-50%);
   width: 3px;
   height: 28px;
-  background: #ff3b3b;
+  background: linear-gradient(180deg, #ff3b3b 0%, #3b82f6 100%);
   border-radius: 0 3px 3px 0;
-  box-shadow: 0 0 10px rgba(255, 59, 59, 0.6);
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.5);
 }
+
 .rail-btn .rail-icon {
   font-size: 22px;
   line-height: 1;
   filter: grayscale(0.3);
   transition: filter 0.15s ease;
 }
+
 .rail-btn.active .rail-icon,
 .rail-btn:hover .rail-icon {
   filter: grayscale(0);
@@ -68,7 +73,7 @@
 
 /* Glass panel */
 .glass {
-  background: rgba(20, 20, 30, 0.6);
+  background: rgba(20, 20, 32, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -79,21 +84,23 @@
   border-radius: 8px 8px 0 0;
   font-size: 13px;
   font-weight: 600;
-  color: #8a8aa3;
+  color: #8a8aa8;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
 }
+
 .content-type-tab:hover {
   color: #f0f0f8;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(59, 130, 246, 0.05);
 }
+
 .content-type-tab.active {
   color: #ffffff;
-  border-bottom-color: #ff3b3b;
-  background: rgba(255, 59, 59, 0.05);
+  border-bottom-color: #3b82f6;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.10) 0%, transparent 100%);
 }
 
 body { user-select: none; }
