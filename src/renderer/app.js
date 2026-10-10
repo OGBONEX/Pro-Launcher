@@ -1,271 +1,202 @@
 // ============================================================
-// WINDOW CONTROLS
-// ============================================================
-document.getElementById('min').onclick = () => window.proClient.minimize();
-document.getElementById('max').onclick = () => window.proClient.maximize();
-document.getElementById('close').onclick = () => window.proClient.close();
-
-// ============================================================
-// TAB SWITCHING
-// ============================================================
-document.querySelectorAll('.rail-btn[data-tab]').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.rail-btn[data-tab]').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.remove('hidden');
-  };
-});
-
-// ============================================================
-// PLAY BUTTON
-// ============================================================
-document.getElementById('play').onclick = async () => {
-  const btn = document.getElementById('play');
-  const status = document.getElementById('status');
-  const version = document.getElementById('version-select').value;
-
-  const accountsData = await window.proClient.listAccounts();
-  const active = accountsData.accounts.find(a => a.uuid === accountsData.active);
-
-  if (!active) {
-    status.textContent = '❌ No account selected. Click the account button to add one.';
-    status.className = 'text-brand text-sm mb-6';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Launching...';
-  status.textContent = `Preparing Minecraft ${version} for ${active.username}...`;
-  status.className = 'text-text-lo text-sm mb-6';
-
-  const result = await window.proClient.launchGame({
-    version,
-    username: active.username
-  });
-
-  btn.disabled = false;
-  btn.textContent = '▶ PLAY';
-
-  if (result.ok) {
-    status.textContent = '✅ Minecraft is starting...';
-    status.className = 'text-green-400 text-sm mb-6';
-  } else {
-    status.textContent = '❌ Error: ' + result.error;
-    status.className = 'text-brand text-sm mb-6';
-  }
-};
-
-document.getElementById('version-select').onchange = (e) => {
-  document.getElementById('home-version').textContent = e.target.value;
-};
-
-// ============================================================
-// CONTENT HUB
+// CONTENT HUB 
 // ============================================================
 let currentContentType = 'modpack';
+let pendingInstall = null;
 
+// Type tab switching
 document.querySelectorAll('.content-type-tab').forEach(tab => {
   tab.onclick = () => {
     document.querySelectorAll('.content-type-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentContentType = tab.dataset.type;
-    document.getElementById('content-results').innerHTML = '';
+    // Reset results to empty state
+    document.getElementById('content-results').innerHTML = `
+      <div class="col-span-full text-center py-20">
+        <div class="text-5xl mb-4">🔎</div>
+        <p class="text-text-lo text-sm">Search for content to install</p>
+        <p class="text-text-dim text-xs mt-2">Powered by Modrinth</p>
+      </div>
+    `;
+    document.getElementById('content-count').textContent = '';
   };
 });
 
-document.getElementById('content-search-btn').onclick = async () => {
+// Search
+document.getElementById('content-search-btn').onclick = doContentSearch;
+document.getElementById('content-query').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') doContentSearch();
+});
+
+async function doContentSearch() {
   const query = document.getElementById('content-query').value.trim();
   const results = document.getElementById('content-results');
+  const countEl = document.getElementById('content-count');
+
+  const gameVersion = document.getElementById('content-version').value;
+  const loader = document.getElementById('content-loader').value;
 
   if (!query) return;
 
-  results.innerHTML = '<p class="text-text-lo text-sm">Searching...</p>';
+  results.innerHTML = '<p class="col-span-full text-text-lo text-sm py-6">Searching...</p>';
+  countEl.textContent = '';
 
   const res = await window.proClient.searchContent({
     query,
     contentType: currentContentType,
-    gameVersion: '1.21.4',
-    loader: 'fabric'
+    gameVersion,
+    loader
   });
 
   if (!res.ok) {
-    results.innerHTML = `<p class="text-brand text-sm">Error: ${res.error}</p>`;
+    results.innerHTML = `<p class="col-span-full text-brand text-sm py-6">Error: ${res.error}</p>`;
     return;
   }
   if (!res.results || !res.results.length) {
-    results.innerHTML = '<p class="text-text-lo text-sm">No results found.</p>';
+    results.innerHTML = `
+      <div class="col-span-full text-center py-20">
+        <div class="text-5xl mb-4">😕</div>
+        <p class="text-text-lo text-sm">No results found</p>
+      </div>`;
     return;
   }
+
+  countEl.textContent = `${res.results.length} results`;
 
   const icons = { modpack: '📦', mod: '🧩', resourcepack: '🎨', datapack: '🗂️' };
   const icon = icons[currentContentType] || '📄';
 
   results.innerHTML = res.results.map(item => `
-    <div class="glass rounded-xl p-4 hover:border-brand/40 transition">
-      <div class="flex items-start gap-3">
-        <div class="w-11 h-11 bg-gradient-to-br from-brand to-brand-hi rounded-lg flex items-center justify-center text-xl">
-          ${icon}
-        </div>
-        <div class="flex-1 min-w-0">
-          <h4 class="font-bold text-sm truncate">${item.name}</h4>
-          <p class="text-xs text-text-lo truncate">by ${item.author}</p>
-        </div>
+    <div class="glass rounded-xl overflow-hidden hover:border-brand/40 transition group">
+      <div class="h-24 bg-gradient-to-br from-brand/20 to-brand-hi/10 flex items-center justify-center text-4xl">
+        ${item.icon ? `<img src="${item.icon}" class="w-16 h-16 rounded-lg object-cover" onerror="this.style.display='none';this.parentNode.textContent='${icon}'"/>` : icon}
       </div>
-      <p class="text-xs text-text-lo mt-3 line-clamp-2">${item.description || 'No description'}</p>
-      <div class="flex justify-between items-center mt-4">
-        <span class="text-[10px] text-text-dim">${(item.downloads || 0).toLocaleString()} downloads</span>
-        <button class="install-btn px-3 py-1 bg-brand text-white text-xs rounded-md hover:bg-brand-hi transition font-semibold"
-                data-id="${item.id}"
-                data-type="${currentContentType}"
-                data-name="${item.name}">
-          Install
-        </button>
+      <div class="p-4">
+        <h4 class="font-bold text-sm truncate">${item.name}</h4>
+        <p class="text-xs text-text-lo truncate mb-3">by ${item.author}</p>
+        <p class="text-xs text-text-lo line-clamp-2 mb-4 h-8">${item.description || 'No description'}</p>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] text-text-dim">⬇ ${(item.downloads || 0).toLocaleString()}</span>
+          <button class="install-btn px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded-md font-semibold transition"
+                  data-id="${item.id}"
+                  data-type="${currentContentType}"
+                  data-name="${item.name}"
+                  data-author="${item.author}"
+                  data-icon="${item.icon || ''}">
+            Install
+          </button>
+        </div>
       </div>
     </div>
   `).join('');
 
   results.querySelectorAll('.install-btn').forEach(btn => {
-    btn.onclick = () => handleInstall(btn);
+    btn.onclick = () => openInstallWizard(btn);
   });
+}
+
+// ============================================================
+// INSTALL WIZARD
+// ============================================================
+const installModal = document.getElementById('install-modal');
+
+function openInstallWizard(btn) {
+  pendingInstall = {
+    projectId: btn.dataset.id,
+    contentType: btn.dataset.type,
+    name: btn.dataset.name,
+    author: btn.dataset.author,
+    icon: btn.dataset.icon
+  };
+
+  // Populate preview
+  document.getElementById('install-name').textContent = pendingInstall.name;
+  document.getElementById('install-author').textContent = 'by ' + pendingInstall.author;
+
+  const iconEl = document.getElementById('install-icon');
+  const icons = { modpack: '📦', mod: '🧩', resourcepack: '🎨', datapack: '🗂️' };
+  if (pendingInstall.icon) {
+    iconEl.innerHTML = `<img src="${pendingInstall.icon}" class="w-full h-full rounded-lg object-cover" />`;
+  } else {
+    iconEl.textContent = icons[pendingInstall.contentType] || '📄';
+  }
+
+  // Default version/loader to what user selected in filter
+  document.getElementById('install-version').value = document.getElementById('content-version').value;
+  document.getElementById('install-loader').value = document.getElementById('content-loader').value;
+
+  // Reset progress
+  document.getElementById('install-progress-wrap').classList.add('hidden');
+  document.getElementById('install-progress-bar').style.width = '0%';
+  document.getElementById('install-percent').textContent = '0%';
+  document.getElementById('install-stage').textContent = 'Preparing...';
+
+  installModal.classList.remove('hidden');
+}
+
+document.getElementById('close-install-modal').onclick = () => installModal.classList.add('hidden');
+document.getElementById('cancel-install-btn').onclick = () => installModal.classList.add('hidden');
+
+installModal.onclick = (e) => {
+  if (e.target === installModal) installModal.classList.add('hidden');
 };
 
-async function handleInstall(btn) {
-  const projectId = btn.dataset.id;
-  const contentType = btn.dataset.type;
-  const name = btn.dataset.name;
+document.getElementById('confirm-install-btn').onclick = async () => {
+  if (!pendingInstall) return;
 
-  btn.disabled = true;
-  btn.textContent = 'Installing...';
-  btn.className = 'install-btn px-3 py-1 bg-bg-raised text-text-lo text-xs rounded-md cursor-wait';
+  const gameVersion = document.getElementById('install-version').value;
+  const loader = document.getElementById('install-loader').value;
+
+  const confirmBtn = document.getElementById('confirm-install-btn');
+  const cancelBtn = document.getElementById('cancel-install-btn');
+  const progressWrap = document.getElementById('install-progress-wrap');
+
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Installing...';
+  cancelBtn.disabled = true;
+  progressWrap.classList.remove('hidden');
+
+  // Live progress handler (registered once globally)
+  const progressHandler = (data) => {
+    if (data.percent !== undefined) {
+      document.getElementById('install-progress-bar').style.width = data.percent + '%';
+      document.getElementById('install-percent').textContent = data.percent + '%';
+    }
+    if (data.stage) {
+      const stages = {
+        downloading: 'Downloading...',
+        extracting: 'Extracting...',
+        mods: `Installing mods (${data.current || 0}/${data.total || 0})`
+      };
+      document.getElementById('install-stage').textContent = stages[data.stage] || data.stage;
+    }
+  };
+
+  const listener = window.proClient.onInstallProgress(progressHandler);
 
   const result = await window.proClient.installContent({
     source: 'modrinth',
-    projectId,
-    contentType,
-    gameVersion: '1.21.4',
-    loader: 'fabric'
+    projectId: pendingInstall.projectId,
+    contentType: pendingInstall.contentType,
+    gameVersion,
+    loader
   });
+
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Install Now';
+  cancelBtn.disabled = false;
 
   if (result.ok) {
-    btn.textContent = '✅ Installed';
-    btn.className = 'install-btn px-3 py-1 bg-green-600 text-white text-xs rounded-md';
+    document.getElementById('install-stage').textContent = '✅ Installed successfully!';
+    document.getElementById('install-percent').textContent = '100%';
+    document.getElementById('install-progress-bar').style.width = '100%';
+
+    setTimeout(() => {
+      installModal.classList.add('hidden');
+      document.getElementById('install-progress-wrap').classList.add('hidden');
+    }, 1500);
   } else {
-    btn.textContent = '❌ Failed';
-    btn.className = 'install-btn px-3 py-1 bg-brand-dark text-white text-xs rounded-md';
-    console.error('Install error:', result.error);
-    alert(`Failed to install ${name}:\n\n${result.error}`);
+    document.getElementById('install-stage').textContent = '❌ Error: ' + result.error;
+    document.getElementById('install-stage').className = 'text-brand';
   }
-}
-
-// Optional live progress logger
-if (window.proClient.onInstallProgress) {
-  window.proClient.onInstallProgress((data) => {
-    console.log('[Install progress]', data);
-  });
-}
-
-// ============================================================
-// ACCOUNT SYSTEM
-// ============================================================
-const accountModal = document.getElementById('account-modal');
-const accountListView = document.getElementById('account-list-view');
-const accountTypeView = document.getElementById('account-type-view');
-const offlineView = document.getElementById('offline-view');
-
-function showView(view) {
-  [accountListView, accountTypeView, offlineView].forEach(v => v.classList.add('hidden'));
-  view.classList.remove('hidden');
-}
-
-document.getElementById('open-account-modal').onclick = async () => {
-  accountModal.classList.remove('hidden');
-  await renderAccountList();
-  showView(accountListView);
 };
-
-document.getElementById('close-account-modal').onclick = () => {
-  accountModal.classList.add('hidden');
-};
-
-accountModal.onclick = (e) => {
-  if (e.target === accountModal) accountModal.classList.add('hidden');
-};
-
-document.getElementById('add-account-btn').onclick = () => showView(accountTypeView);
-document.getElementById('back-to-list').onclick = () => showView(accountListView);
-
-document.getElementById('add-offline-btn').onclick = () => {
-  document.getElementById('offline-username').value = '';
-  document.getElementById('offline-error').classList.add('hidden');
-  showView(offlineView);
-  setTimeout(() => document.getElementById('offline-username').focus(), 50);
-};
-
-document.getElementById('back-to-types').onclick = () => showView(accountTypeView);
-
-document.getElementById('add-microsoft-btn').onclick = () => {
-  alert('Microsoft login coming soon!');
-};
-
-document.getElementById('confirm-offline-btn').onclick = async () => {
-  const input = document.getElementById('offline-username');
-  const errorEl = document.getElementById('offline-error');
-  const username = input.value.trim();
-
-  if (username.length < 3 || username.length > 16) {
-    errorEl.textContent = 'Username must be 3-16 characters.';
-    errorEl.classList.remove('hidden');
-    return;
-  }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    errorEl.textContent = 'Only letters, numbers, and underscores.';
-    errorEl.classList.remove('hidden');
-    return;
-  }
-
-  await window.proClient.addOfflineAccount(username);
-  await renderAccountList();
-  await updateRailUsername();
-  showView(accountListView);
-};
-
-async function renderAccountList() {
-  const data = await window.proClient.listAccounts();
-  const list = document.getElementById('account-list');
-
-  if (!data.accounts.length) {
-    list.innerHTML = '<p class="text-text-dim text-sm text-center py-4">No accounts yet</p>';
-    return;
-  }
-
-  list.innerHTML = data.accounts.map(acc => `
-    <div class="flex items-center gap-3 p-3 rounded-xl ${acc.uuid === data.active ? 'bg-brand/10 border border-brand/30' : 'bg-bg-raised/50 border border-border-dim'} cursor-pointer hover:border-brand/40 transition" data-uuid="${acc.uuid}">
-      <div class="w-9 h-9 rounded-lg bg-brand flex items-center justify-center text-lg">👤</div>
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold truncate">${acc.username}</div>
-        <div class="text-xs text-text-dim">Offline</div>
-      </div>
-      ${acc.uuid === data.active ? '<span class="text-brand text-[10px] font-bold">ACTIVE</span>' : ''}
-    </div>
-  `).join('');
-
-  list.querySelectorAll('[data-uuid]').forEach(el => {
-    el.onclick = async () => {
-      await window.proClient.setActiveAccount(el.dataset.uuid);
-      await renderAccountList();
-      await updateRailUsername();
-    };
-  });
-}
-
-async function updateRailUsername() {
-  const data = await window.proClient.listAccounts();
-  const active = data.accounts.find(a => a.uuid === data.active);
-  const railUsername = document.getElementById('rail-username');
-  if (railUsername) {
-    railUsername.textContent = active ? active.username.slice(0, 8) : 'Guest';
-  }
-}
-
-updateRailUsername();
