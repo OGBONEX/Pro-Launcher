@@ -2,7 +2,7 @@
   "name": "pro-client",
   "version": "1.0.6",
   "description": "Pro Client - Minecraft Launcher",
-  "author": "OGBONEX_YT",
+  "author": "OGBONEX",
   "repository": {
     "type": "git",
     "url": "https://github.com/OGBONEX/Pro-Launcher.git"
@@ -35,11 +35,11 @@
       "category": "Game"
     },
     "win": {
-      "target": ["nsis"],
-      "nsis": {
-        "oneClick": false,
-        "allowToChangeInstallationDirectory": true
-      }
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "mac": {
       "target": ["dmg"]
