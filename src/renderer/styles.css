@@ -1,42 +1,81 @@
-/* Pro Client — Red & White theme
-   Only handles things Tailwind CDN can't. */
+/* Pro Client — Lunar Client style
+   Dark theme, thin top bar, icon rail, glassy panels. */
 
 /* Draggable titlebar */
-.titlebar {
-  -webkit-app-region: drag;
-}
-.titlebar button {
-  -webkit-app-region: no-drag;
+.titlebar { -webkit-app-region: drag; }
+.titlebar button { -webkit-app-region: no-drag; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb { background: #1f1f2e; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2a3f; }
+
+/* Icon rail (Lunar-style left column) */
+.rail {
+  background: linear-gradient(180deg, #0f0f18 0%, #0a0a12 100%);
+  border-right: 1px solid #1a1a26;
 }
 
-/* Custom scrollbar (light theme) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #ffffff;
-}
-::-webkit-scrollbar-thumb {
-  background: #e5e5e5;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #d4d4d4;
-}
-
-/* Sidebar active tab */
-.sidebar-btn.active {
-  background: #dc2626;
-  color: #ffffff;
+.rail-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  color: #6b6b85;
+  font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  margin: 2px 0;
+}
+.rail-btn:hover {
+  background: rgba(255, 59, 59, 0.08);
+  color: #e6e6f0;
+}
+.rail-btn.active {
+  background: rgba(255, 59, 59, 0.15);
+  color: #ffffff;
+}
+/* Lunar-style vertical accent bar on the active tab */
+.rail-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 28px;
+  background: #ff3b3b;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 10px rgba(255, 59, 59, 0.6);
+}
+.rail-btn .rail-icon {
+  font-size: 22px;
+  line-height: 1;
+  filter: grayscale(0.3);
+  transition: filter 0.15s ease;
+}
+.rail-btn.active .rail-icon,
+.rail-btn:hover .rail-icon {
+  filter: grayscale(0);
 }
 
-/* Prevent text selection on UI chrome */
-body {
-  user-select: none;
+/* Glass panel utility */
+.glass {
+  background: rgba(20, 20, 30, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
-input,
-textarea {
-  user-select: text;
-}
+
+/* Prevent text selection on chrome */
+body { user-select: none; }
+input, textarea { user-select: text; }
