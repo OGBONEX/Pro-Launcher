@@ -6,14 +6,13 @@ const mods = require('./mods');
 const mc = require('./minecraft');
 
 updateElectronApp({
-  updateInterval: '1 hour',
   repo: 'OGBONEX/Pro-Launcher',
-  updateSource: {
-    type: 'GitHub',
-    repo: 'OGBONEX/Pro-Launcher'
-  }
+  updateInterval: '1 hour'
 });
 
+let mainWindow;
+
+// ... rest of your main.js stays exactly the same
 let mainWindow;
 
 function createWindow() {
