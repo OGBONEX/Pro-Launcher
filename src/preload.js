@@ -5,5 +5,6 @@ contextBridge.exposeInMainWorld('proClient', {
   maximize: () => ipcRenderer.send('window-maximize'),
   close: () => ipcRenderer.send('window-close'),
   getVersions: () => ipcRenderer.invoke('get-versions'),
-  launchGame: (opts) => ipcRenderer.invoke('launch-game', opts)
+  launchGame: (opts) => ipcRenderer.invoke('launch-game', opts),
+  searchMods: (opts) => ipcRenderer.invoke('search-mods', opts)
 });
