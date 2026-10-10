@@ -7,10 +7,12 @@ const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
 const mc = require('./minecraft');
 const instances = require('./instances');
+const skins = require('./skins');
 const { installLoader } = require('./loaders');
 const { installContent } = require('./downloader');
 
 const ACCOUNTS_FILE = path.join(os.homedir(), '.proclient', 'accounts.json');
+const SETTINGS_FILE = path.join(os.homedir(), '.proclient', 'settings.json');
 
 updateElectronApp({
   repo: 'OGBONEX/Pro-Launcher',
@@ -53,6 +55,27 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => mainWindow.close());
 
 // ============================================================
+// SETTINGS
+// ============================================================
+function loadSettings() {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch (e) {}
+  return { ram: 2, javaPath: '', discord: true };
+}
+
+function saveSettings(data) {
+  fs.mkdirSync(path.dirname(SETTINGS_FILE), { recursive: true });
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2));
+}
+
+ipcMain.handle('settings:get', () => loadSettings());
+ipcMain.handle('settings:set', (_e, data) => {
+  saveSettings(data);
+  return { ok: true };
+});
+
+// ============================================================
 // ACCOUNTS
 // ============================================================
 function loadAccounts() {
@@ -67,8 +90,7 @@ function loadAccounts() {
 }
 
 function saveAccounts(data) {
-  const dir = path.dirname(ACCOUNTS_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.mkdirSync(path.dirname(ACCOUNTS_FILE), { recursive: true });
   fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(data, null, 2));
 }
 
@@ -209,4 +231,31 @@ ipcMain.handle('install-content', async (event, opts) => {
       event.sender.send('install-progress', progress);
     }
   });
+});
+
+// ============================================================
+// SKINS
+// ============================================================
+ipcMain.handle('skins:lookup', async (_e, username) => {
+  try {
+    const result = await skins.lookupMojangSkin(username);
+    return { ok: true, ...result };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('skins:upload', async (_e, { username, pngBase64 }) => {
+  try {
+    const buffer = Buffer.from(pngBase64, 'base64');
+    const filePath = skins.saveCustomSkin(username, buffer);
+    return { ok: true, filePath };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('skins:get-custom', (_e, username) => {
+  const filePath = skins.getCustomSkin(username);
+  return { ok: true, filePath };
 });
