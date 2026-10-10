@@ -11,9 +11,7 @@
   },
   "dependencies": {
     "update-electron-app": "^3.0.0",
-    "discord-rpc": "^4.0.1",
-    "@xmcl/core": "^2.16.2",
-    "@xmcl/installer": "^6.3.4"
+    "discord-rpc": "^4.0.1"
   },
   "devDependencies": {
     "electron": "^31.0.0",
