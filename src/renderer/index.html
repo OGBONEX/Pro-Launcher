@@ -89,7 +89,7 @@
         <span class="rail-icon" style="color:#22c55e; font-size:14px;">●</span>
         <span class="text-text-dim">Online</span>
       </div>
-      <div class="text-[10px] text-text-dim pb-2 tracking-wider">v1.3.0</div>
+      <div class="text-[10px] text-text-dim pb-2 tracking-wider">v1.4.0</div>
     </aside>
 
     <!-- Main content -->
@@ -228,16 +228,67 @@
 
       <!-- SKINS TAB -->
       <section id="skins" class="tab hidden h-full p-8 overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-2">Skins</h2>
-        <p class="text-text-lo text-sm">Skin system coming soon.</p>
+        <h2 class="text-2xl font-bold mb-6">Skin Studio</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <div class="glass rounded-xl p-6 mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-4">Lookup Player</h3>
+              <div class="flex gap-2">
+                <input id="skin-search" placeholder="Enter username..."
+                       class="flex-1 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm" />
+                <button id="skin-search-btn" class="px-4 py-3 bg-brand rounded-xl font-semibold text-white hover:bg-brand-hi text-sm">Search</button>
+              </div>
+            </div>
+
+            <div class="glass rounded-xl p-6">
+              <h3 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-4">Upload Custom Skin</h3>
+              <input id="skin-file" type="file" accept="image/png"
+                     class="w-full p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-brand file:text-white file:text-xs" />
+              <p class="text-[10px] text-text-dim mt-2">64x64 PNG. Other players see it only if they use Pro Client.</p>
+              <button id="skin-upload-btn" class="w-full mt-3 py-3 bg-accent rounded-xl font-bold text-white hover:bg-accent-hi text-sm">Apply Custom Skin</button>
+            </div>
+          </div>
+
+          <div class="glass rounded-xl p-6 flex items-center justify-center">
+            <canvas id="skin-canvas" width="260" height="340"></canvas>
+          </div>
+        </div>
       </section>
 
       <!-- SETTINGS TAB -->
-      <section id="settings" class="tab hidden h-full p-8 overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4">Settings</h2>
-        <div class="glass rounded-xl p-6">
-          <p class="text-text-lo text-sm">Settings coming soon.</p>
+      <section id="settings" class="tab hidden h-full overflow-y-auto p-8">
+        <h2 class="text-2xl font-bold mb-6">Settings</h2>
+
+        <div class="glass rounded-xl p-6 mb-4">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-4">Memory</h3>
+          <label class="text-sm text-text-lo block mb-2">Maximum RAM (GB)</label>
+          <input id="settings-ram" type="range" min="1" max="16" value="2" class="w-full accent-brand" />
+          <div class="flex justify-between text-xs text-text-dim mt-1">
+            <span>1 GB</span>
+            <span id="settings-ram-value">2 GB</span>
+            <span>16 GB</span>
+          </div>
         </div>
+
+        <div class="glass rounded-xl p-6 mb-4">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-4">Java</h3>
+          <label class="text-sm text-text-lo block mb-2">Custom Java Path (leave empty for auto)</label>
+          <input id="settings-java" type="text" placeholder="C:\Program Files\Java\jre\bin\java.exe"
+                 class="w-full p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm" />
+        </div>
+
+        <div class="glass rounded-xl p-6 mb-4">
+          <h3 class="text-sm font-bold uppercase tracking-widest text-text-dim mb-4">Launcher</h3>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input id="settings-discord" type="checkbox" checked class="accent-brand" />
+            <span class="text-sm">Enable Discord Rich Presence</span>
+          </label>
+        </div>
+
+        <button id="save-settings-btn" class="px-6 py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition">
+          Save Settings
+        </button>
       </section>
 
     </main>
@@ -389,32 +440,4 @@
       </div>
 
       <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Name</label>
-      <input id="new-instance-name" placeholder="My Instance" maxlength="40"
-             class="w-full mt-2 mb-4 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm" />
-
-      <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Version</label>
-      <select id="new-instance-version"
-              class="w-full mt-2 mb-4 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
-        <option value="">Loading...</option>
-      </select>
-
-      <label class="text-xs uppercase tracking-widest text-text-dim font-bold">Mod Loader</label>
-      <select id="new-instance-loader"
-              class="w-full mt-2 mb-5 p-3 bg-bg-raised/80 rounded-xl border border-border-dim text-text-hi focus:border-brand outline-none text-sm">
-        <option value="vanilla">Vanilla</option>
-        <option value="fabric">Fabric</option>
-        <option value="quilt">Quilt</option>
-        <option value="forge">Forge</option>
-        <option value="neoforge">NeoForge</option>
-      </select>
-
-      <button id="create-instance-btn"
-              class="w-full py-3 bg-brand rounded-xl font-bold text-white hover:bg-brand-hi transition">
-        Create Instance
-      </button>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
+      <input id
