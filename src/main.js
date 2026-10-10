@@ -6,6 +6,7 @@ const os = require('os');
 const { updateElectronApp } = require('update-electron-app');
 const mods = require('./mods');
 const mc = require('./minecraft');
+const instances = require('./instances');
 const { installContent } = require('./downloader');
 
 const ACCOUNTS_FILE = path.join(os.homedir(), '.proclient', 'accounts.json');
@@ -124,10 +125,46 @@ ipcMain.handle('get-versions', async () => {
   }
 });
 
-ipcMain.handle('launch-game', async (_e, { version, username }) => {
+ipcMain.handle('launch-game', async (_e, { version, username, instanceFolder }) => {
   try {
-    await mc.launchGame(version, username);
+    await mc.launchGame(version, username, null, instanceFolder);
     return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+// ============================================================
+// INSTANCES
+// ============================================================
+ipcMain.handle('instances:list', () => {
+  try {
+    return { ok: true, instances: instances.listInstances() };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('instances:create', (_e, opts) => {
+  try {
+    return { ok: true, instance: instances.createInstance(opts) };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('instances:delete', (_e, folder) => {
+  try {
+    instances.deleteInstance(folder);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('instances:update', (_e, folder, patch) => {
+  try {
+    return { ok: true, instance: instances.updateInstance(folder, patch) };
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -146,9 +183,14 @@ ipcMain.handle('search-content', async (_e, { query, contentType, gameVersion, l
 });
 
 ipcMain.handle('install-content', async (event, opts) => {
+  const instanceMinecraftDir = opts.instanceFolder
+    ? instances.getInstanceMinecraftDir(opts.instanceFolder)
+    : undefined;
+
   return await installContent({
     ...opts,
     source: 'modrinth',
+    instancePath: instanceMinecraftDir,
     onProgress: (progress) => {
       event.sender.send('install-progress', progress);
     }
