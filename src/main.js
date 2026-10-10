@@ -46,7 +46,12 @@ ipcMain.handle('get-versions', async () => {
 });
 
 ipcMain.handle('launch-game', async (_e, { version, username }) => {
-  return { ok: false, error: 'Minecraft launch coming in a future update' };
+  try {
+    await mc.launchGame(version, username);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 });
 
 // ----- Mod search (Modrinth + CurseForge) -----
